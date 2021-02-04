@@ -1,0 +1,43 @@
+- name: sleeping
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: waiting
+  on_enter:
+  - entry_timestamp
+  - wait_for
+  ignore_invalid_triggers: null
+- name: opening
+  on_enter:
+  - entry_timestamp
+  - open_roof
+  ignore_invalid_triggers: null
+- name: scheduling
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: acquiring
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: configuring
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: observing
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: closing
+  on_enter:
+  - entry_timestamp
+  - close_roof
+  ignore_invalid_triggers: null
+- name: pau
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null
+- name: alert
+  on_enter:
+  - entry_timestamp
+  ignore_invalid_triggers: null

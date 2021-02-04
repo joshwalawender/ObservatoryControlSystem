@@ -8,4 +8,6 @@ with open(safety_file, 'a') as FO:
 
 from ocs.observatory import hokuula
 
+hokuula.machine.get_graph().draw('state_diagram.png', prog='dot')
+
 hokuula.wake_up()

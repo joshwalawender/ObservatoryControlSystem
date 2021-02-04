@@ -1,6 +1,12 @@
 from pathlib import Path
 import logging
 
+class EquipmentFailure(): pass
+class RoofFailure(EquipmentFailure): pass
+class TelescopeFailure(EquipmentFailure): pass
+class InstrumentFailure(EquipmentFailure): pass
+class DetectorFailure(EquipmentFailure): pass
+
 
 ##-------------------------------------------------------------------------
 ## Create logger object

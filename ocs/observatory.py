@@ -4,11 +4,19 @@ from time import sleep
 from datetime import datetime
 import random
 import numpy as np
+import yaml
 
-from transitions import Machine, State, Transition
+from astropy import coordinates as c
 
-from .simulators import Weather, Roof, Telescope
+from transitions.extensions import GraphMachine as Machine
+from transitions import State
 
+from .simulators.weather import Weather
+from .simulators.roof import Roof
+from .simulators.telescope import Telescope
+from .simulators.instrument import Instrument
+from .simulators.detector import Detector
+from .scheduler import Scheduler
 
 # Set up logging; The basic log level will be DEBUG
 # import logging
@@ -23,59 +31,38 @@ close the roof.  This assumes that there are no collision possibilites between
 the roof and the telescope.
 '''
 
-targets = ['M42', 'M31', 'M104', 'M78', None]
-
-states = [State(name='sleeping',
-                on_enter=['entry_timestamp']),
-          State(name='opening',
-                on_enter=['entry_timestamp', 'open_roof']),
-          State(name='ready',
-                on_enter=['entry_timestamp', 'pick_target']),
-          State(name='acquiring',
-                on_enter=['entry_timestamp', 'slew_telescope']),
-          State(name='parking',
-                on_enter=['entry_timestamp', 'park']),
-          State(name='observing',
-                on_enter=['entry_timestamp', 'begin_observation'],
-                on_exit=['clear_current_target']),
-          State(name='closing',
-                on_enter=['entry_timestamp', 'close_roof']),
-          State(name='shutdown',
-                on_enter=['entry_timestamp', 'park', 'end_of_night_shutdown']),
-         ]
-
-transitions = [
-          {'trigger': 'wake_up',        'source': 'sleeping',  'dest': 'opening', 'conditions': 'is_safe'},
-          {'trigger': 'done_opening',   'source': 'opening',   'dest': 'ready'},
-          {'trigger': 'acquire',        'source': 'ready',     'dest': 'acquiring', 'conditions': 'is_safe'},
-          {'trigger': 'acquisition_complete', 'source': 'acquiring',   'dest': 'observing', 'conditions': 'is_safe'},
-          {'trigger': 'done_observing', 'source': 'observing', 'dest': 'ready'},
-          {'trigger': 'park_telescope', 'source': '*',         'dest': 'parking'},
-          {'trigger': 'done_parking',   'source': 'parking',   'dest': 'sleeping'},
-          {'trigger': 'end_of_night',   'source': '*',         'dest': 'shutdown'},
-         ]
+with open(Path(__file__).parent.joinpath('states.yaml')) as states_file:
+    states = yaml.safe_load(states_file)
+with open(Path(__file__).parent.joinpath('transitions.yaml')) as transitions_file:
+    transitions = yaml.safe_load(transitions_file)
+with open(Path(__file__).parent.joinpath('location.yaml')) as location_file:
+    location_info = yaml.safe_load(location_file)
 
 
 ##-------------------------------------------------------------------------
-## Define Roll Off Roof Class
+## Define Roll Off Roof Model
 ##-------------------------------------------------------------------------
 class RollOffRoof():
     def __init__(self, name):
         self.name = name
-        self.machine = Machine(model=self, states=states,
-                               transitions=transitions, initial='sleeping')
-
+        self.location = c.EarthLocation.from_geocentric(**location_info)
+        self.machine = Machine(model=self,
+                               states=states,
+                               transitions=transitions,
+                               initial='sleeping',
+                               use_pygraphviz=True,
+                               )
         # Initialize Status Values
-        self.safe_parked = True
         self.entered_state_at = datetime.now()
-        self.next_target = None
-        self.current_target = None
         self.observed = []
         self.failed = []
         # Components
         self.weather = Weather()
         self.roof = Roof()
         self.telescope = Telescope()
+        self.instrument = Instrument()
+        self.detector = Detector()
+        self.scheduler = Scheduler()
 
 
     ##-------------------------------------------------------------------------
@@ -89,60 +76,50 @@ class RollOffRoof():
         self.entered_state_at = datetime.now()
 
 
-    def clear_current_target(self):
-        self.current_target = None
-
-
     ##-------------------------------------------------------------------------
-    ## Utilities
+    ## Status Checks
     def is_safe(self):
         return self.weather.is_safe()
 
 
-    def check_ok(self):
+    def not_interrupted(self):
         return self.weather.has_been_safe(self.entered_state_at)
+
+
+    def is_dark(self):
+        
+
+
+    ##-------------------------------------------------------------------------
+    ## Overall Controls
+    def wait_for(self, waittime=30):
+        # Actions on entering new state
+        sleep(waittime)
+        # Trigger next state
+        self.open()
 
 
     ##-------------------------------------------------------------------------
     ## Roof Controls
     def open_roof(self):
         self.print_status('Opening the roof')
-        self.safe_parked = False
-        open = self.roof.open()
-        if open is True:
-            self.done_opening()
-        else:
-            self.unsafe()
+        try:
+            self.roof.open()
+        except:
+            self.failed_opening()
+        self.select_OB()
 
 
     def close_roof(self):
         self.print_status('Closing the roof')
-        closed = self.roof.close()
-        if closed is True:
-            self.safe_parked = True
-            self.print_status('Roof closed')
-            self.done_closing()
-        else:
-            self.print_status('Roof close failed')
+        try:
+            self.roof.close()
+        except:
+            self.critical_failure()
 
 
     ##-------------------------------------------------------------------------
-    ## Scheduler
-    def pick_target(self):
-        if len(targets) > 0:
-            self.print_status('Selecting target ...')
-            chosen_index = random.choice([i for i in range(0,len(targets))])
-            self.next_target = targets.pop(chosen_index)
-            if self.next_target is not None:
-                self.print_status(f'Next Target will be {self.next_target}')
-                self.slew()
-            else:
-                self.print_status('No targets available, waiting')
-                sleep(5)
-                self.pick_target()
-        else:
-            self.print_status('No more targets available ...')
-            self.end_of_night()
+    ## Scheduling
 
 
     ##-------------------------------------------------------------------------
@@ -204,3 +181,5 @@ class RollOffRoof():
 ##-------------------------------------------------------------------------
 hokuula = RollOffRoof(name='hokuula')
 
+if __name__ == '__main__':
+    hokuula.machine.get_graph().draw('state_diagram.png', prog='dot')

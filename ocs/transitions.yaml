@@ -1,0 +1,81 @@
+# Normal Operations
+- trigger: wake_up
+  source: sleeping
+  dest: waiting
+  conditions:
+  - is_dark
+- trigger: open
+  source: waiting
+  dest: opening
+  conditions:
+  - is_safe
+- trigger: select_OB
+  source:
+  - opening
+  - observing
+  dest: scheduling
+  conditions:
+  - is_safe
+- trigger: acquire
+  source: scheduling
+  dest: acquiring
+  conditions:
+  - is_safe
+- trigger: configure
+  source: acquiring
+  dest: configuring
+  conditions:
+  - is_safe
+- trigger: observe
+  source: configuring
+  dest: observing
+  conditions:
+  - is_safe
+- trigger: end_of_night
+  source: observing
+  dest: closing
+  conditions: []
+- trigger: shutdown
+  source: closing
+  dest: pau
+  conditions: []
+- trigger: wait
+  source:
+  - scheduling
+  - closing
+  dest: waiting
+  conditions: []
+
+# Failures
+- trigger: failed_opening
+  source: opening
+  dest: closing
+  conditions: []
+- trigger: failed_acquisition
+  source: acquiring
+  dest: scheduling
+  conditions: []
+- trigger: failed_to_configure
+  source: configuring
+  dest: closing
+  conditions: []
+- trigger: failed_observation
+  source: observing
+  dest: scheduling
+  conditions: []
+- trigger: critical_failure
+  source: closing
+  dest: alert
+  conditions: []
+
+# Unsafe
+- trigger: unsafe
+  source:
+  - opening
+  - scheduling
+  - acquiring
+  - configuring
+  - observing
+  - waiting
+  dest: closing
+  conditions: []
