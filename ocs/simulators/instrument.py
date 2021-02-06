@@ -10,4 +10,3 @@ class Instrument():
 
     def configure(self, instconfig):
         sleep(self.time_to_configure)
-        return True

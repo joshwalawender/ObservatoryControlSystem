@@ -1,0 +1,5 @@
+waittime: 2
+maxwaits: 4
+loglevel_console: debug
+loglevel_file: debug
+logfile: '~/ocs.log'

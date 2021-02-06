@@ -1,38 +1,53 @@
 # Normal Operations
 - trigger: wake_up
-  source: sleeping
+  source: 
+  - sleeping
+  - closing
   dest: waiting
   conditions:
-  - is_dark
+  - not_shutting_down
 - trigger: open
   source: waiting
   dest: opening
   conditions:
   - is_safe
+  - is_dark
+  - not_shutting_down
 - trigger: select_OB
   source:
   - opening
+  - waiting
   - observing
   dest: scheduling
   conditions:
   - is_safe
+  - is_dark
+  - not_shutting_down
 - trigger: acquire
   source: scheduling
   dest: acquiring
   conditions:
   - is_safe
+  - is_dark
+  - not_shutting_down
 - trigger: configure
   source: acquiring
   dest: configuring
   conditions:
   - is_safe
+  - is_dark
+  - not_shutting_down
 - trigger: observe
   source: configuring
   dest: observing
   conditions:
   - is_safe
-- trigger: end_of_night
-  source: observing
+  - is_dark
+  - not_shutting_down
+- trigger: close
+  source:
+  - observing
+  - waiting
   dest: closing
   conditions: []
 - trigger: shutdown
