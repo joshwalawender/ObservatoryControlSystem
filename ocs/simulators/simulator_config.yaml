@@ -1,7 +1,7 @@
 # Roof
 roof_time_to_open: 5
 roof_time_to_close: 5
-open_fail_after: 1
+open_fail_after: null
 open_random_fail_rate: 0
 close_fail_after: null
 close_random_fail_rate: 0
@@ -17,5 +17,6 @@ configure_fail_after: null
 configure_random_fail_rate: 0
 
 # Detector
-expose_fail_after: null
+exposure_overhead: 5
+expose_fail_after: 1
 expose_random_fail_rate: 0

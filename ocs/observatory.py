@@ -18,6 +18,7 @@ conf.auto_max_age = None
 from transitions import Machine
 from transitions import State
 
+from . import RoofFailure, TelescopeFailure, InstrumentFailure, DetectorFailure
 from .simulators.weather import Weather
 from .simulators.roof import Roof
 from .simulators.telescope import Telescope
@@ -223,7 +224,6 @@ class RollOffRoof():
         except:
             self.critical_failure()
         else:
-            print(self.we_are_done)
             if self.we_are_done is True:
                 self.shutdown()
             else:
@@ -289,14 +289,20 @@ class RollOffRoof():
         self.log('starting observation')
         self.current_OB = self.next_OB
         self.next_OB = None
-        sleep(5)
-#         ok = self.check_ok()
-#         if ok is True:
-#             self.log('observation complete')
-#             self.observed.append(self.current_target)
-#         else:
-#             self.log('observation failed')
-#             self.failed.append(self.current_target)
+        try:
+            self.detector.expose(self.current_OB.detconfig)
+        except DetectorFailure:
+            self.log('Detector failure', level=logging.ERROR)
+            self.error_count += 1
+        else:
+#             ok = self.check_ok()
+            ok = True
+            if ok is True:
+                self.log('observation complete')
+                self.observed.append(self.current_target)
+            else:
+                self.log('observation failed')
+                self.failed.append(self.current_target)
         self.select_OB()
 
 
