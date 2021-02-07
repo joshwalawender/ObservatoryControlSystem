@@ -1,5 +1,15 @@
+name: hokuula
+location_file: location.yaml
+states_file: states.yaml
+transitions_file: transitions.yaml
+initial_state: sleeping
+max_allowed_errors: 0
+
+# waiting
 waittime: 2
 maxwaits: 4
+
+# Logging
 loglevel_console: debug
 loglevel_file: debug
-logfile: '~/ocs.log'
+logfile: ocs.log
