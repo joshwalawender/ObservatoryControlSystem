@@ -31,7 +31,9 @@
   - is_dark
   - not_shutting_down
 - trigger: configure
-  source: acquiring
+  source:
+  - acquiring
+  - observing
   dest: configuring
   conditions:
   - is_safe

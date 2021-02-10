@@ -14,9 +14,11 @@ from astropy.time import Time
 from astropy.utils.iers import conf
 conf.auto_max_age = None
 
-# from transitions.extensions import GraphMachine as Machine
-from transitions import Machine
+from transitions.extensions import GraphMachine as Machine
+# from transitions import Machine
 from transitions import State
+
+from odl.block import ObservingBlockList
 
 from . import RoofFailure, TelescopeFailure, InstrumentFailure, DetectorFailure
 from .simulators.weather import Weather
@@ -81,12 +83,12 @@ class RollOffRoof():
                                states=states,
                                transitions=transitions,
                                initial=initial,
-#                                use_pygraphviz=True,
+                               use_pygraphviz=True,
                                )
         # Initialize Status Values
         self.entered_state_at = datetime.now()
-        self.observed = []
-        self.failed = []
+        self.observed = ObservingBlockList([])
+        self.failed = ObservingBlockList([])
         self.next_OB = None
         self.current_OB = None
         self.waitcount = 0
@@ -251,7 +253,7 @@ class RollOffRoof():
         self.telescope.slew(self.next_OB.target)
         self.log('Slew complete')
         self.current_target = self.next_OB.target
-        if self.next_OB.acquire is not None:
+        if self.next_OB.align is not None:
             # do extra acquire steps
             pass
         self.configure()
@@ -299,10 +301,10 @@ class RollOffRoof():
             ok = True
             if ok is True:
                 self.log('observation complete')
-                self.observed.append(self.current_target)
+                self.observed.append(self.current_OB)
             else:
                 self.log('observation failed')
-                self.failed.append(self.current_target)
+                self.failed.append(self.current_OB)
         self.select_OB()
 
 
@@ -313,8 +315,10 @@ class RollOffRoof():
 
 
     def night_summary(self):
-        self.log(f'Observed: {self.observed}')
-        self.log(f'Failed: {self.failed}')
+        self.log('Observed:')
+        log.info(self.observed)
+        self.log('Failed:')
+        log.info(self.failed)
         for state in self.durations.keys():
             self.log(f'Spent {self.durations[state]:.1f}s in {state}')
 

@@ -10,6 +10,6 @@ waittime: 2
 maxwaits: 4
 
 # Logging
-loglevel_console: debug
+loglevel_console: info
 loglevel_file: debug
 logfile: ocs.log

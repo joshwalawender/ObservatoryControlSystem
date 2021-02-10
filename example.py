@@ -8,6 +8,6 @@ with open(safety_file, 'a') as FO:
 
 from ocs.observatory import obs
 
-# obs.machine.get_graph().draw('state_diagram.png', prog='dot')
+obs.machine.get_graph().draw('state_diagram.png', prog='dot')
 
 obs.wake_up()
