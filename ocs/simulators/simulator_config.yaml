@@ -1,13 +1,15 @@
 # Roof
-roof_time_to_open: 5
-roof_time_to_close: 5
+roof_time_to_open: 1
+roof_time_to_close: 1
 open_fail_after: null
 open_random_fail_rate: 0
 close_fail_after: null
 close_random_fail_rate: 0
 
 # Telescope
-slew_fail_after: null
+time_to_slew: 1
+time_to_park: 1
+slew_fail_after: 2
 slew_random_fail_rate: 0
 park_fail_after: null
 park_random_fail_rate: 0
@@ -17,6 +19,6 @@ configure_fail_after: null
 configure_random_fail_rate: 0
 
 # Detector
-exposure_overhead: 5
+exposure_overhead: 1
 expose_fail_after: null
 expose_random_fail_rate: 0

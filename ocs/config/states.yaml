@@ -24,7 +24,7 @@
 - name: acquiring
   on_enter:
   - entry_timestamp
-  - slew_telescope
+  - begin_acquisition
   on_exit:
   - exit_timestamp
 - name: configuring

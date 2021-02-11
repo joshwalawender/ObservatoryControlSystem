@@ -1,9 +1,11 @@
 from pathlib import Path
 import logging
 
+
 class EquipmentFailure(Exception): pass
 class RoofFailure(EquipmentFailure): pass
 class TelescopeFailure(EquipmentFailure): pass
+class AcquisitionFailure(EquipmentFailure): pass
 class InstrumentFailure(EquipmentFailure): pass
 class DetectorFailure(EquipmentFailure): pass
 

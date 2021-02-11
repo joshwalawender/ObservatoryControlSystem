@@ -31,9 +31,7 @@
   - is_dark
   - not_shutting_down
 - trigger: configure
-  source:
-  - acquiring
-  - observing
+  source: acquiring
   dest: configuring
   conditions:
   - is_safe
@@ -48,6 +46,10 @@
   - not_shutting_down
 - trigger: close
   source:
+  - opening
+  - scheduling
+  - acquiring
+  - configuring
   - observing
   - waiting
   dest: closing
@@ -69,6 +71,10 @@
   dest: closing
   conditions: []
 - trigger: failed_acquisition
+  source: acquiring
+  dest: scheduling
+  conditions: []
+- trigger: failed_slew
   source: acquiring
   dest: scheduling
   conditions: []
