@@ -2,6 +2,7 @@
   on_enter:
   - entry_timestamp
   on_exit:
+  - log_wakeup
   - exit_timestamp
 - name: waiting
   on_enter:

@@ -23,48 +23,30 @@ from odl.alignment import BlindAlign
 
 from . import (RoofFailure, TelescopeFailure, AcquisitionFailure,
                InstrumentFailure, DetectorFailure)
-from .simulators.weather import Weather
-from .simulators.roof import Roof
-from .simulators.telescope import Telescope
-from .simulators.instrument import Instrument
-from .simulators.detector import Detector
 from .scheduler import Scheduler
-
-
-##-------------------------------------------------------------------------
-## Load Configuration Data
-##-------------------------------------------------------------------------
-root_path = Path(__file__).parent.joinpath('config')
-with open(root_path / 'config.yaml') as config_file:
-    config = yaml.safe_load(config_file)
-# Load States File
-states_file = root_path / config.get('state_file', 'states.yaml')
-with open(states_file.expanduser().absolute()) as states_obj:
-    states = yaml.safe_load(states_obj)
-# Load Transitions File
-transitions_file = root_path / config.get('transitions_file', 'transitions.yaml')
-with open(transitions_file.expanduser().absolute()) as transitions_obj:
-    transitions = yaml.safe_load(transitions_obj)
-# Load Location File
-location_file = root_path / config.get('location_file', 'location.yaml')
-with open(location_file.expanduser().absolute()) as location_obj:
-    location_info = yaml.safe_load(location_obj)
 
 
 ##-------------------------------------------------------------------------
 ## Create logger object
 ##-------------------------------------------------------------------------
 import logging
+root_path = Path(__file__).parent.joinpath('config')
+with open(root_path / 'log_config.yaml') as log_config_file:
+    log_config = yaml.safe_load(log_config_file)
 log = logging.getLogger('RollOffRoof')
 log.setLevel(logging.DEBUG)
 ## Set up console output
 LogConsoleHandler = logging.StreamHandler()
-LogConsoleHandler.setLevel(getattr(logging, config.get('loglevel_console').upper()))
-LogFormat = logging.Formatter('%(asctime)s %(levelname)6s %(message)s',
-#                               datefmt='%Y-%m-%d %H:%M:%S')
-                             )
+LogConsoleHandler.setLevel(getattr(logging, log_config.get('loglevel_console').upper()))
+LogFormat = logging.Formatter('%(asctime)s %(levelname)6s %(message)s')
 LogConsoleHandler.setFormatter(LogFormat)
 log.addHandler(LogConsoleHandler)
+## Set up file output
+# LogFileName = None
+# LogFileHandler = logging.FileHandler(LogFileName)
+# LogFileHandler.setLevel(logging.DEBUG)
+# LogFileHandler.setFormatter(LogFormat)
+# log.addHandler(LogFileHandler)
 
 
 ##-------------------------------------------------------------------------
@@ -73,18 +55,46 @@ log.addHandler(LogConsoleHandler)
 class RollOffRoof():
     '''Simple observatory with roll off roof.
     '''
-    def __init__(self, name, states={}, transitions={}, initial=None,
+    def __init__(self, name='myobservatory',
+                 states_file='states.yaml',
+                 transitions_file='transitions.yaml',
+                 location_file = 'location.yaml',
+                 initial_state='sleeping',
                  waittime=2, maxwaits=4, max_allowed_errors=0,
+                 Weather=None, weather_config={},
+                 Roof=None, roof_config={},
+                 Telescope=None, telescope_config={},
+                 Instrument=None, instrument_config={},
+                 Detector=None, detector_config={},
                  ):
         self.name = name
+        # Components
+        self.weather = Weather(config=weather_config)
+        self.roof = Roof(config=roof_config)
+        self.telescope = Telescope(config=telescope_config)
+        self.instrument = Instrument(config=instrument_config)
+        self.detector = Detector(config=detector_config)
+        self.scheduler = Scheduler()
+        # Load States File
+        states_file = root_path.joinpath(states_file)
+        with open(states_file.expanduser().absolute()) as FO:
+            self.states = yaml.safe_load(FO)
+        # Load Transitions File
+        transitions_file = root_path.joinpath(transitions_file)
+        with open(transitions_file.expanduser().absolute()) as FO:
+            self.transitions = yaml.safe_load(FO)
+        # Load Location File
+        location_file = root_path.joinpath(location_file)
+        with open(location_file.expanduser().absolute()) as FO:
+            self.location_info = yaml.safe_load(FO)
+        self.location = c.EarthLocation(**self.location_info)
         self.waittime = waittime
         self.maxwaits = maxwaits
         self.max_allowed_errors = max_allowed_errors
-        self.location = c.EarthLocation(**location_info)
         self.machine = Machine(model=self,
-                               states=states,
-                               transitions=transitions,
-                               initial=initial,
+                               states=self.states,
+                               transitions=self.transitions,
+                               initial=initial_state,
                                use_pygraphviz=True,
                                )
         # Initialize Status Values
@@ -97,33 +107,11 @@ class RollOffRoof():
         self.we_are_done = False
         self.durations = {}
         self.error_count = 0
-        # Components
-        self.weather = Weather()
-        self.roof = Roof()
-        self.telescope = Telescope()
-        self.instrument = Instrument()
-        self.detector = Detector()
-        self.scheduler = Scheduler()
-        # log initial state
-        self.log('Starting software')
-        # log states
-        log.debug('States')
-        for state in states:
-            log.debug(f'  {state}')
-        # log transitions
-        log.debug('Transitions')
-        for transition in transitions:
-            log.debug(f'  {transition}')
-        # log location
-        log.debug('Location Info')
-        for key in location_info.keys():
-            log.debug(f'  {key}: {location_info.get(key)}')
 
 
     ##-------------------------------------------------------------------------
     ## Utilities
     def log(self, msg, level=logging.INFO):
-        open_str = {True: 'Open', False: 'Closed'}[self.roof.is_open]
         log.log(level, f'{self.state:12s}: {msg}')
 
 
@@ -139,6 +127,34 @@ class RollOffRoof():
             self.durations[self.state] += duration
         else:
             self.durations[self.state] = duration
+
+
+    def log_wakeup(self):
+        self.log(f'Waking up observatory: {self.name}')
+        # log states
+        self.log('States', logging.DEBUG)
+        for state in self.states:
+            self.log(f'  {state}', logging.DEBUG)
+        # log transitions
+        self.log('Transitions', logging.DEBUG)
+        for transition in self.transitions:
+            self.log(f'  {transition}', logging.DEBUG)
+        # log location
+        self.log('Location Info', logging.DEBUG)
+        for key in self.location_info.keys():
+            self.log(f'  {key}: {self.location_info.get(key)}', logging.DEBUG)
+        self.log(f'Roof parameters:', logging.DEBUG)
+        for key in self.roof.config.keys():
+            self.log(f'  {key}: {self.roof.config.get(key)}', logging.DEBUG)
+        self.log(f'Telescope parameters:', logging.DEBUG)
+        for key in self.telescope.config.keys():
+            self.log(f'  {key}: {self.telescope.config.get(key)}', logging.DEBUG)
+        self.log(f'Instrument parameters:', logging.DEBUG)
+        for key in self.instrument.config.keys():
+            self.log(f'  {key}: {self.instrument.config.get(key)}', logging.DEBUG)
+        self.log(f'Detector parameters:', logging.DEBUG)
+        for key in self.detector.config.keys():
+            self.log(f'  {key}: {self.detector.config.get(key)}', logging.DEBUG)
 
 
     ##-------------------------------------------------------------------------
@@ -172,8 +188,8 @@ class RollOffRoof():
 
         done_string = {True: '', False: 'not '}[self.we_are_done]
         self.log(f'We are {done_string}shutting down', level=logging.DEBUG)
-        if self.we_are_done is True:
-            self.close()
+#         if self.we_are_done is True:
+#             self.close()
         return (not self.we_are_done)
 
 
@@ -216,7 +232,7 @@ class RollOffRoof():
         self.log('Opening the roof')
         try:
             self.roof.open()
-        except:
+        except RoofFailure:
             self.log('Problem opening roof!', level=logging.ERROR)
             self.error_count += 1
             self.failed_opening()
@@ -228,12 +244,15 @@ class RollOffRoof():
         self.log('Closing the roof')
         try:
             self.roof.close()
-        except:
+        except RoofFailure:
+            self.log('Roof failure on closing', logging.ERROR)
             self.critical_failure()
         else:
             if self.we_are_done is True:
+                self.log('Shutting down')
                 self.shutdown()
             else:
+                self.log('Going to wait')
                 self.wake_up()
 
 
@@ -277,6 +296,7 @@ class RollOffRoof():
         else:
             self.log(f"Did not recognize alignment {self.next_OB.align.name}",
                      level=logging.ERROR)
+            self.failed.append(self.current_OB)
             self.failed_acquisition()
 
 
@@ -347,18 +367,3 @@ class RollOffRoof():
         log.info('Failed:')
         for line in str(self.failed).split('\n'):
             log.info('  |'+line)
-
-
-##-------------------------------------------------------------------------
-## Instantiate the Observatory
-##-------------------------------------------------------------------------
-obs = RollOffRoof(name=config.get('name', 'myobservatory'),
-                  states=states,
-                  transitions=transitions,
-                  initial=config.get('initial_state', 'sleeping'),
-                  waittime=config.get('waittime', 2),
-                  maxwaits=config.get('maxwaits', 4),
-                  )
-
-if __name__ == '__main__':
-    obs.machine.get_graph().draw('state_diagram.png', prog='dot')

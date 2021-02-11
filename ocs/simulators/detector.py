@@ -2,25 +2,24 @@
 from time import sleep
 import random
 
-from . import config
 from .. import DetectorFailure
 
 
 class Detector():
-    def __init__(self):
+    def __init__(self, config={}):
+        self.config = config
         self.name = 'simulator'
-        self.overhead = config.get('exposure_overhead', 0)
         self.exposure_count = 0
 
 
     def expose(self, detconfig):
 #         if detconfig is not None:
 #             sleep(self.detconfig.exptime)
-        sleep(self.overhead)
+        sleep(self.config.get('exposure_overhead', 0))
         self.exposure_count += 1
-        if config.get('expose_fail_after', None) is not None:
-            if self.exposure_count >= config.get('expose_fail_after'):
+        if self.config.get('expose_fail_after', None) is not None:
+            if self.exposure_count >= self.config.get('expose_fail_after'):
                 raise DetectorFailure
-        if config.get('expose_random_fail_rate', None) is not None:
-            if random.random() <= config.get('expose_random_fail_rate'):
+        if self.config.get('expose_random_fail_rate', None) is not None:
+            if random.random() <= self.config.get('expose_random_fail_rate'):
                 raise DetectorFailure

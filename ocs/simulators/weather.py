@@ -7,7 +7,7 @@ import numpy as np
 
 
 class Weather():
-    def __init__(self):
+    def __init__(self, config={}):
         self.safety_file = Path('~/.safe.txt').expanduser()
 
 
@@ -45,5 +45,3 @@ class Weather():
             values.append(safe)
         ok = np.all(np.array(values))
         return ok
-
-

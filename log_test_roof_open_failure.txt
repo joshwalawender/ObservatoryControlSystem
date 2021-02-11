@@ -1,0 +1,1809 @@
+2021-02-10 23:08:44,142   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:08:44,235  DEBUG sleeping    : We are not shutting down
+2021-02-10 23:08:44,236   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:08:44,236  DEBUG sleeping    : States
+2021-02-10 23:08:44,236  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,236  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,236  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,236  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,236  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,237  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,237  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,237  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,237  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,237  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:44,238  DEBUG sleeping    : Transitions
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': ['not_shutting_down']}
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:44,238  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:44,239  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:08:44,240  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:44,240  DEBUG sleeping    : Location Info
+2021-02-10 23:08:44,240  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:08:44,240  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:08:44,240  DEBUG sleeping    :   height: 677
+2021-02-10 23:08:44,240  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:08:44,240  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:44,240  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:44,240  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:08:44,240  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:44,240  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:44,241  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:44,241  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:44,241  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:44,241  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:44,241  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:44,242  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:08:44,242  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:08:44,242  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:44,242  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:44,242  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:44,243  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:44,243  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:44,243  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:44,243  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:44,243  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:44,243  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:44,243  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:44,243  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:44,244  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:44,244  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:08:44,244  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:44,244  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:44,244  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:08:44,244  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:44,244  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:44,245  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:44,245  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:44,245  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:44,245  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:44,245  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:44,246  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:44,246  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:08:44,246  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:44,246  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:44,246  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:08:44,246  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:44,246  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:44,246  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:44,246  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:44,247  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:44,247  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:44,247  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:44,247  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:44,247  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:44,247  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:44,247  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:44,247  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:44,248  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:44,248  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:44,248  DEBUG sleeping    : Exiting state sleeping after 0.2s
+2021-02-10 23:08:44,248   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:44,248   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:08:44,248  DEBUG waiting     : Checking safe
+2021-02-10 23:08:44,250  DEBUG waiting     : Safe? True
+2021-02-10 23:08:44,250  DEBUG waiting     : Checking dark
+2021-02-10 23:08:45,130  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:45,130  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:45,130  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:08:45,130   INFO opening     : Entering state: opening
+2021-02-10 23:08:45,130   INFO opening     : Opening the roof
+2021-02-10 23:08:45,131  DEBUG opening     : Checking safe
+2021-02-10 23:08:45,131  DEBUG opening     : Safe? True
+2021-02-10 23:08:45,131  DEBUG opening     : Checking dark
+2021-02-10 23:08:45,181  DEBUG opening     : Sun is Down? True
+2021-02-10 23:08:45,181  DEBUG opening     : We are not shutting down
+2021-02-10 23:08:45,181  DEBUG opening     : Exiting state opening after 0.1s
+2021-02-10 23:08:45,181   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,181   INFO scheduling  : Got M42
+2021-02-10 23:08:45,182  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,182  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,182  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,209  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,209  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,209  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,209   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,210   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,210   INFO acquiring   : Slewing to: M42
+2021-02-10 23:08:45,210   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,210  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,210  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,210  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,236  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,236  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,236  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,236   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,237   INFO configuring : configuring instrument: L Filter
+2021-02-10 23:08:45,237  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,237  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,237  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,262  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,262  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,262  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,262   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,262   INFO observing   : starting observation
+2021-02-10 23:08:45,263   INFO observing   : observation complete
+2021-02-10 23:08:45,263  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,263  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,263  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,297  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,298  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,298  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,298   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,298   INFO scheduling  : Got M42
+2021-02-10 23:08:45,298  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,298  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,298  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,325  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,325  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,325  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,325   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,325   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,326   INFO acquiring   : Slewing to: M42
+2021-02-10 23:08:45,326   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,326  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,326  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,326  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,352  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,352  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,352  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,352   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,352   INFO configuring : configuring instrument: R Filter
+2021-02-10 23:08:45,352  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,353  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,353  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,379  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,379  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,379  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,379   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,379   INFO observing   : starting observation
+2021-02-10 23:08:45,379   INFO observing   : observation complete
+2021-02-10 23:08:45,380  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,380  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,380  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,406  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,406  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,406  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,407   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,407   INFO scheduling  : Got M42
+2021-02-10 23:08:45,407  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,407  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,407  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,436  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,436  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,436  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,436   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,437   INFO acquiring   : Executing Mask Align (None)
+2021-02-10 23:08:45,437  ERROR acquiring   : Did not recognize alignment Mask Align (None)
+2021-02-10 23:08:45,437  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,437   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,437   INFO scheduling  : Got M42
+2021-02-10 23:08:45,437  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,437  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,438  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,462  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,462  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,463  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,463   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,463   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,463   INFO acquiring   : Slewing to: M42
+2021-02-10 23:08:45,463   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,463  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,464  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,464  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,493  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,493  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,493  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,493   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,493   INFO configuring : configuring instrument: B Filter
+2021-02-10 23:08:45,493  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,493  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,494  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,520  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,520  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,520  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,520   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,520   INFO observing   : starting observation
+2021-02-10 23:08:45,521   INFO observing   : observation complete
+2021-02-10 23:08:45,521  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,521  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,521  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,548  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,549  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,549  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,549   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,549   INFO scheduling  : Got M78
+2021-02-10 23:08:45,549  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,549  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,549  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,576  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,576  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,576  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,577   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,577   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,577   INFO acquiring   : Slewing to: M78
+2021-02-10 23:08:45,577   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,577  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,577  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,578  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,602  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,602  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,603  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,603   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,603   INFO configuring : configuring instrument: L Filter
+2021-02-10 23:08:45,603  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,604  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,604  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,629  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,629  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,629  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,629   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,630   INFO observing   : starting observation
+2021-02-10 23:08:45,630   INFO observing   : observation complete
+2021-02-10 23:08:45,630  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,630  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,630  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,657  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,657  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,657  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,657   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,658   INFO scheduling  : Got M78
+2021-02-10 23:08:45,658  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,658  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,658  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,683  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,684  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,684  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,684   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,684   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,684   INFO acquiring   : Slewing to: M78
+2021-02-10 23:08:45,685   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,685  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,685  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,685  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,710  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,711  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,711  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,711   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,711   INFO configuring : configuring instrument: R Filter
+2021-02-10 23:08:45,712  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,712  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,712  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,737  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,737  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,737  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,737   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,737   INFO observing   : starting observation
+2021-02-10 23:08:45,737   INFO observing   : observation complete
+2021-02-10 23:08:45,737  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,738  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,738  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,763  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,763  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,764  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,764   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,764   INFO scheduling  : Got M78
+2021-02-10 23:08:45,764  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,765  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,765  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,791  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,791  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,791  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,791   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,791   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,791   INFO acquiring   : Slewing to: M78
+2021-02-10 23:08:45,792   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,792  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,792  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,792  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,817  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,817  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,817  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,817   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,817   INFO configuring : configuring instrument: G Filter
+2021-02-10 23:08:45,818  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,818  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,818  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,844  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,845  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,845  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,845   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,845   INFO observing   : starting observation
+2021-02-10 23:08:45,845   INFO observing   : observation complete
+2021-02-10 23:08:45,846  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,846  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,846  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,875  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,875  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,876  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,876   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,876   INFO scheduling  : Got M78
+2021-02-10 23:08:45,876  DEBUG scheduling  : Checking safe
+2021-02-10 23:08:45,876  DEBUG scheduling  : Safe? True
+2021-02-10 23:08:45,876  DEBUG scheduling  : Checking dark
+2021-02-10 23:08:45,905  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:08:45,906  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:08:45,906  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,906   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:08:45,906   INFO acquiring   : Executing Blind Align
+2021-02-10 23:08:45,906   INFO acquiring   : Slewing to: M78
+2021-02-10 23:08:45,907   INFO acquiring   : Slew complete
+2021-02-10 23:08:45,907  DEBUG acquiring   : Checking safe
+2021-02-10 23:08:45,907  DEBUG acquiring   : Safe? True
+2021-02-10 23:08:45,907  DEBUG acquiring   : Checking dark
+2021-02-10 23:08:45,933  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:08:45,934  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:08:45,934  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:08:45,934   INFO configuring : Entering state: configuring
+2021-02-10 23:08:45,934   INFO configuring : configuring instrument: B Filter
+2021-02-10 23:08:45,935  DEBUG configuring : Checking safe
+2021-02-10 23:08:45,935  DEBUG configuring : Safe? True
+2021-02-10 23:08:45,935  DEBUG configuring : Checking dark
+2021-02-10 23:08:45,960  DEBUG configuring : Sun is Down? True
+2021-02-10 23:08:45,961  DEBUG configuring : We are not shutting down
+2021-02-10 23:08:45,961  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:08:45,961   INFO observing   : Entering state: observing
+2021-02-10 23:08:45,961   INFO observing   : starting observation
+2021-02-10 23:08:45,961   INFO observing   : observation complete
+2021-02-10 23:08:45,961  DEBUG observing   : Checking safe
+2021-02-10 23:08:45,962  DEBUG observing   : Safe? True
+2021-02-10 23:08:45,962  DEBUG observing   : Checking dark
+2021-02-10 23:08:45,987  DEBUG observing   : Sun is Down? True
+2021-02-10 23:08:45,988  DEBUG observing   : We are not shutting down
+2021-02-10 23:08:45,988  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:08:45,988   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:45,988   INFO scheduling  : No more targets
+2021-02-10 23:08:45,988  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:45,988   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:45,988   INFO waiting     : waiting 0s (roof is open? True, waitcount = 1)
+2021-02-10 23:08:45,989  DEBUG waiting     : Checking safe
+2021-02-10 23:08:45,989  DEBUG waiting     : Safe? True
+2021-02-10 23:08:45,989  DEBUG waiting     : Checking dark
+2021-02-10 23:08:46,014  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:46,014  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:46,015  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,015   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:46,015   INFO scheduling  : No more targets
+2021-02-10 23:08:46,015  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:46,015   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:46,015   INFO waiting     : waiting 0s (roof is open? True, waitcount = 2)
+2021-02-10 23:08:46,016  DEBUG waiting     : Checking safe
+2021-02-10 23:08:46,016  DEBUG waiting     : Safe? True
+2021-02-10 23:08:46,016  DEBUG waiting     : Checking dark
+2021-02-10 23:08:46,043  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:46,043  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:46,043  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,043   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:46,043   INFO scheduling  : No more targets
+2021-02-10 23:08:46,044  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:46,044   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:46,044   INFO waiting     : waiting 0s (roof is open? True, waitcount = 3)
+2021-02-10 23:08:46,044  DEBUG waiting     : Checking safe
+2021-02-10 23:08:46,044  DEBUG waiting     : Safe? True
+2021-02-10 23:08:46,045  DEBUG waiting     : Checking dark
+2021-02-10 23:08:46,070  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:46,070  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:46,070  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,070   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:46,070   INFO scheduling  : No more targets
+2021-02-10 23:08:46,071  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:46,071   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:46,071   INFO waiting     : waiting 0s (roof is open? True, waitcount = 4)
+2021-02-10 23:08:46,071  DEBUG waiting     : Checking safe
+2021-02-10 23:08:46,072  DEBUG waiting     : Safe? True
+2021-02-10 23:08:46,072  DEBUG waiting     : Checking dark
+2021-02-10 23:08:46,098  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:46,098  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:46,098  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,099   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:08:46,099   INFO scheduling  : No more targets
+2021-02-10 23:08:46,099  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:08:46,099   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:46,099   INFO waiting     : Wait count exceeded
+2021-02-10 23:08:46,099  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,099   INFO closing     : Entering state: closing
+2021-02-10 23:08:46,100   INFO closing     : Closing the roof
+2021-02-10 23:08:46,100  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:08:46,100   INFO pau         : Entering state: pau
+2021-02-10 23:08:46,100   INFO pau         : Spent 0.2s in sleeping
+2021-02-10 23:08:46,100   INFO pau         : Spent 1.0s in waiting
+2021-02-10 23:08:46,100   INFO pau         : Spent 0.1s in opening
+2021-02-10 23:08:46,100   INFO pau         : Spent 0.2s in scheduling
+2021-02-10 23:08:46,100   INFO pau         : Spent 0.2s in acquiring
+2021-02-10 23:08:46,100   INFO pau         : Spent 0.2s in configuring
+2021-02-10 23:08:46,101   INFO pau         : Spent 0.2s in observing
+2021-02-10 23:08:46,101   INFO pau         : Spent 0.0s in closing
+2021-02-10 23:08:46,101   INFO Observed:
+2021-02-10 23:08:46,101   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:08:46,101   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:08:46,101   INFO   |M42            |Stare x1              |L Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,101   INFO   |M42            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO   |M42            |Stare x1              |B Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO   |M78            |Stare x1              |L Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO   |M78            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO   |M78            |Stare x1              |G Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO   |M78            |Stare x1              |B Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,102   INFO Failed:
+2021-02-10 23:08:46,102   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:08:46,102   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:08:46,102   INFO   |M42            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:08:46,106  DEBUG sleeping    : We are not shutting down
+2021-02-10 23:08:46,106   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:08:46,106  DEBUG sleeping    : States
+2021-02-10 23:08:46,106  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,106  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,106  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:08:46,107  DEBUG sleeping    : Transitions
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': ['not_shutting_down']}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:46,107  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:46,108  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:08:46,109  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:08:46,109  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:08:46,109  DEBUG sleeping    : Location Info
+2021-02-10 23:08:46,109  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:08:46,109  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:08:46,109  DEBUG sleeping    :   height: 677
+2021-02-10 23:08:46,109  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:08:46,109  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:46,109  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:46,109  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:08:46,109  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:46,109  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:46,110  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:46,110  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:46,110  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:46,110  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:46,110  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:08:46,110  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:46,110  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:46,111  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:46,111  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:46,111  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:46,111  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:46,111  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:46,112  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:08:46,112  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:46,112  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:46,112  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:46,112  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:46,113  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:46,113  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:46,113  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:08:46,113  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:08:46,113  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:08:46,113  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:08:46,114  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:08:46,114  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:08:46,114  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:08:46,114  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:08:46,114  DEBUG sleeping    : Exiting state sleeping after 1.9s
+2021-02-10 23:08:46,115   INFO waiting     : Entering state: waiting
+2021-02-10 23:08:46,115   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:08:46,115  DEBUG waiting     : Checking safe
+2021-02-10 23:08:46,115  DEBUG waiting     : Safe? True
+2021-02-10 23:08:46,115  DEBUG waiting     : Checking dark
+2021-02-10 23:08:46,142  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:08:46,142  DEBUG waiting     : We are not shutting down
+2021-02-10 23:08:46,143  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:08:46,143   INFO opening     : Entering state: opening
+2021-02-10 23:08:46,143   INFO opening     : Opening the roof
+2021-02-10 23:08:46,143  ERROR opening     : Problem opening roof!
+2021-02-10 23:08:46,143  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:08:46,143   INFO closing     : Entering state: closing
+2021-02-10 23:08:46,143   INFO closing     : Closing the roof
+2021-02-10 23:08:46,144  ERROR closing     : Error count for tonight exceeded
+2021-02-10 23:08:46,144  DEBUG closing     : We are shutting down
+2021-02-10 23:14:59,300   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:14:59,391  DEBUG sleeping    : We are not shutting down
+2021-02-10 23:14:59,391   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:14:59,391  DEBUG sleeping    : States
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,391  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:14:59,392  DEBUG sleeping    : Transitions
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': ['not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:14:59,392  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:14:59,393  DEBUG sleeping    : Location Info
+2021-02-10 23:14:59,393  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:14:59,393  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:14:59,393  DEBUG sleeping    :   height: 677
+2021-02-10 23:14:59,393  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:14:59,393  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:14:59,393  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:14:59,393  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:14:59,394  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:14:59,394  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:14:59,394  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:14:59,394  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:14:59,395  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:14:59,395  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:14:59,395  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:14:59,396  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:14:59,396  DEBUG sleeping    : Exiting state sleeping after 0.1s
+2021-02-10 23:14:59,396   INFO waiting     : Entering state: waiting
+2021-02-10 23:14:59,396   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:14:59,396  DEBUG waiting     : Checking safe
+2021-02-10 23:14:59,397  DEBUG waiting     : Safe? True
+2021-02-10 23:14:59,397  DEBUG waiting     : Checking dark
+2021-02-10 23:15:00,288  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:15:00,288  DEBUG waiting     : We are not shutting down
+2021-02-10 23:15:00,288  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:15:00,288   INFO opening     : Entering state: opening
+2021-02-10 23:15:00,288   INFO opening     : Opening the roof
+2021-02-10 23:15:00,288  ERROR opening     : Problem opening roof!
+2021-02-10 23:15:00,288  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:15:00,288   INFO closing     : Entering state: closing
+2021-02-10 23:15:00,288   INFO closing     : Closing the roof
+2021-02-10 23:15:00,288   INFO closing     : Going to wait
+2021-02-10 23:15:00,288  DEBUG closing     : We are not shutting down
+2021-02-10 23:15:00,289  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:15:00,289   INFO waiting     : Entering state: waiting
+2021-02-10 23:15:00,289   INFO waiting     : waiting 0s (roof is open? False, waitcount = 2)
+2021-02-10 23:15:00,289  DEBUG waiting     : Checking safe
+2021-02-10 23:15:00,289  DEBUG waiting     : Safe? True
+2021-02-10 23:15:00,289  DEBUG waiting     : Checking dark
+2021-02-10 23:15:00,317  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:15:00,317  DEBUG waiting     : We are not shutting down
+2021-02-10 23:15:00,318  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:15:00,318   INFO opening     : Entering state: opening
+2021-02-10 23:15:00,318   INFO opening     : Opening the roof
+2021-02-10 23:15:00,318  ERROR opening     : Problem opening roof!
+2021-02-10 23:15:00,318  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:15:00,318   INFO closing     : Entering state: closing
+2021-02-10 23:15:00,318   INFO closing     : Closing the roof
+2021-02-10 23:15:00,318   INFO closing     : Going to wait
+2021-02-10 23:15:00,318  ERROR closing     : Error count for tonight exceeded
+2021-02-10 23:15:00,319  DEBUG closing     : We are shutting down
+2021-02-10 23:16:16,006   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:16:16,096  DEBUG sleeping    : We are not shutting down
+2021-02-10 23:16:16,096   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:16:16,096  DEBUG sleeping    : States
+2021-02-10 23:16:16,096  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,096  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,096  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:16:16,097  DEBUG sleeping    : Transitions
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': ['not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:16:16,097  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:16:16,098  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:16:16,098  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:16:16,098  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:16:16,098  DEBUG sleeping    : Location Info
+2021-02-10 23:16:16,098  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:16:16,098  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:16:16,098  DEBUG sleeping    :   height: 677
+2021-02-10 23:16:16,098  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:16:16,098  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:16:16,098  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:16:16,098  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:16:16,098  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:16:16,098  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:16:16,098  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:16:16,098  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:16:16,098  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:16:16,099  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:16:16,099  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:16:16,099  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:16:16,100  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:16:16,100  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:16:16,100  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:16:16,101  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:16:16,101  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:16:16,101  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:16:16,101  DEBUG sleeping    : Exiting state sleeping after 0.1s
+2021-02-10 23:16:16,101   INFO waiting     : Entering state: waiting
+2021-02-10 23:16:16,101   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:16:16,101  DEBUG waiting     : Checking safe
+2021-02-10 23:16:16,102  DEBUG waiting     : Safe? True
+2021-02-10 23:16:16,102  DEBUG waiting     : Checking dark
+2021-02-10 23:16:17,006  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:16:17,006  DEBUG waiting     : We are not shutting down
+2021-02-10 23:16:17,007  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:16:17,007   INFO opening     : Entering state: opening
+2021-02-10 23:16:17,007   INFO opening     : Opening the roof
+2021-02-10 23:16:17,007  ERROR opening     : Problem opening roof!
+2021-02-10 23:16:17,007  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:16:17,007   INFO closing     : Entering state: closing
+2021-02-10 23:16:17,007   INFO closing     : Closing the roof
+2021-02-10 23:16:17,007   INFO closing     : Going to wait
+2021-02-10 23:16:17,008  DEBUG closing     : We are not shutting down
+2021-02-10 23:16:17,008  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:16:17,008   INFO waiting     : Entering state: waiting
+2021-02-10 23:16:17,008   INFO waiting     : waiting 0s (roof is open? False, waitcount = 2)
+2021-02-10 23:16:17,008  DEBUG waiting     : Checking safe
+2021-02-10 23:16:17,008  DEBUG waiting     : Safe? True
+2021-02-10 23:16:17,008  DEBUG waiting     : Checking dark
+2021-02-10 23:16:17,036  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:16:17,037  DEBUG waiting     : We are not shutting down
+2021-02-10 23:16:17,037  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:16:17,037   INFO opening     : Entering state: opening
+2021-02-10 23:16:17,037   INFO opening     : Opening the roof
+2021-02-10 23:16:17,037  ERROR opening     : Problem opening roof!
+2021-02-10 23:16:17,037  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:16:17,037   INFO closing     : Entering state: closing
+2021-02-10 23:16:17,037   INFO closing     : Closing the roof
+2021-02-10 23:16:17,037   INFO closing     : Going to wait
+2021-02-10 23:16:17,037  ERROR closing     : Error count for tonight exceeded
+2021-02-10 23:16:17,037  DEBUG closing     : We are shutting down
+2021-02-10 23:17:38,935   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:17:39,022   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:17:39,023  DEBUG sleeping    : States
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:17:39,023  DEBUG sleeping    : Transitions
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:17:39,023  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:17:39,024  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:17:39,024  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:17:39,024  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:17:39,024  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:17:39,024  DEBUG sleeping    : Location Info
+2021-02-10 23:17:39,024  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:17:39,024  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:17:39,024  DEBUG sleeping    :   height: 677
+2021-02-10 23:17:39,024  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:17:39,024  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:17:39,024  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:17:39,024  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:17:39,024  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:17:39,025  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:17:39,025  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:17:39,025  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:17:39,025  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:17:39,025  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:17:39,026  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:17:39,026  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:17:39,026  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:17:39,027  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:17:39,027  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:17:39,027  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:17:39,028  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:17:39,028  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:17:39,028  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:17:39,028  DEBUG sleeping    : Exiting state sleeping after 0.1s
+2021-02-10 23:17:39,028   INFO waiting     : Entering state: waiting
+2021-02-10 23:17:39,028   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:17:39,028  DEBUG waiting     : Checking safe
+2021-02-10 23:17:39,029  DEBUG waiting     : Safe? True
+2021-02-10 23:17:39,029  DEBUG waiting     : Checking dark
+2021-02-10 23:17:39,943  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:17:39,943  DEBUG waiting     : We are not shutting down
+2021-02-10 23:17:39,943  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:17:39,943   INFO opening     : Entering state: opening
+2021-02-10 23:17:39,943   INFO opening     : Opening the roof
+2021-02-10 23:17:39,943  ERROR opening     : Problem opening roof!
+2021-02-10 23:17:39,943  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:17:39,943   INFO closing     : Entering state: closing
+2021-02-10 23:17:39,944   INFO closing     : Closing the roof
+2021-02-10 23:17:39,944   INFO closing     : Going to wait
+2021-02-10 23:17:39,944  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:17:39,944   INFO waiting     : Entering state: waiting
+2021-02-10 23:17:39,944   INFO waiting     : waiting 0s (roof is open? False, waitcount = 2)
+2021-02-10 23:17:39,944  DEBUG waiting     : Checking safe
+2021-02-10 23:17:39,945  DEBUG waiting     : Safe? True
+2021-02-10 23:17:39,945  DEBUG waiting     : Checking dark
+2021-02-10 23:17:39,973  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:17:39,973  DEBUG waiting     : We are not shutting down
+2021-02-10 23:17:39,973  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:17:39,973   INFO opening     : Entering state: opening
+2021-02-10 23:17:39,973   INFO opening     : Opening the roof
+2021-02-10 23:17:39,973  ERROR opening     : Problem opening roof!
+2021-02-10 23:17:39,973  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:17:39,974   INFO closing     : Entering state: closing
+2021-02-10 23:17:39,974   INFO closing     : Closing the roof
+2021-02-10 23:17:39,974   INFO closing     : Going to wait
+2021-02-10 23:17:39,974  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:17:39,974   INFO waiting     : Entering state: waiting
+2021-02-10 23:17:39,974   INFO waiting     : Too may errors
+2021-02-10 23:17:39,974  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:17:39,974   INFO closing     : Entering state: closing
+2021-02-10 23:17:39,974   INFO closing     : Closing the roof
+2021-02-10 23:17:39,974   INFO closing     : Shutting down
+2021-02-10 23:17:39,974  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:17:39,974   INFO pau         : Entering state: pau
+2021-02-10 23:17:39,975   INFO pau         : Spent 0.1s in sleeping
+2021-02-10 23:17:39,975   INFO pau         : Spent 0.9s in waiting
+2021-02-10 23:17:39,975   INFO pau         : Spent 0.0s in opening
+2021-02-10 23:17:39,975   INFO pau         : Spent 0.0s in closing
+2021-02-10 23:17:39,975   INFO Observed:
+2021-02-10 23:17:39,975   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:17:39,975   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:17:39,975   INFO Failed:
+2021-02-10 23:17:39,975   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:17:39,975   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:34,033   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:19:34,123   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:19:34,124  DEBUG sleeping    : States
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,124  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:34,125  DEBUG sleeping    : Transitions
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:34,125  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:34,126  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:19:34,126  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:34,126  DEBUG sleeping    : Location Info
+2021-02-10 23:19:34,126  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:19:34,126  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:19:34,126  DEBUG sleeping    :   height: 677
+2021-02-10 23:19:34,126  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:19:34,126  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:34,126  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:34,126  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:34,126  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:34,126  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:34,126  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:19:34,126  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:34,126  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:19:34,127  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:34,127  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:34,127  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:19:34,128  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:34,128  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:34,128  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:34,129  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:34,129  DEBUG sleeping    : Exiting state sleeping after 0.1s
+2021-02-10 23:19:34,129   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:34,129   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:19:34,129  DEBUG waiting     : Checking safe
+2021-02-10 23:19:34,131  DEBUG waiting     : Safe? True
+2021-02-10 23:19:34,131  DEBUG waiting     : Checking dark
+2021-02-10 23:19:35,030  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:35,031  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:35,031  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:19:35,031   INFO opening     : Entering state: opening
+2021-02-10 23:19:35,031   INFO opening     : Opening the roof
+2021-02-10 23:19:35,031  ERROR opening     : Problem opening roof!
+2021-02-10 23:19:35,031  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:19:35,031   INFO closing     : Entering state: closing
+2021-02-10 23:19:35,031   INFO closing     : Closing the roof
+2021-02-10 23:19:35,031   INFO closing     : Going to wait
+2021-02-10 23:19:35,031  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:35,032   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:35,032   INFO waiting     : waiting 0s (roof is open? False, waitcount = 2)
+2021-02-10 23:19:35,032  DEBUG waiting     : Checking safe
+2021-02-10 23:19:35,032  DEBUG waiting     : Safe? True
+2021-02-10 23:19:35,032  DEBUG waiting     : Checking dark
+2021-02-10 23:19:35,064  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:35,064  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:35,065  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:35,065   INFO opening     : Entering state: opening
+2021-02-10 23:19:35,065   INFO opening     : Opening the roof
+2021-02-10 23:19:35,065  ERROR opening     : Problem opening roof!
+2021-02-10 23:19:35,065  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:19:35,065   INFO closing     : Entering state: closing
+2021-02-10 23:19:35,065   INFO closing     : Closing the roof
+2021-02-10 23:19:35,065   INFO closing     : Going to wait
+2021-02-10 23:19:35,065  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:35,065   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:35,066   INFO waiting     : Too may errors
+2021-02-10 23:19:35,066  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:35,066   INFO closing     : Entering state: closing
+2021-02-10 23:19:35,066   INFO closing     : Closing the roof
+2021-02-10 23:19:35,066   INFO closing     : Shutting down
+2021-02-10 23:19:35,066  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:35,066   INFO pau         : Entering state: pau
+2021-02-10 23:19:35,066   INFO pau         : Spent 0.1s in sleeping
+2021-02-10 23:19:35,066   INFO pau         : Spent 0.9s in waiting
+2021-02-10 23:19:35,066   INFO pau         : Spent 0.0s in opening
+2021-02-10 23:19:35,066   INFO pau         : Spent 0.0s in closing
+2021-02-10 23:19:35,066   INFO Observed:
+2021-02-10 23:19:35,067   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:35,067   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:35,067   INFO Failed:
+2021-02-10 23:19:35,067   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:35,068   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:42,340   INFO 
+
+******** Beginning Tests ********
+
+2021-02-10 23:19:42,428   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:19:42,428  DEBUG sleeping    : States
+2021-02-10 23:19:42,428  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,428  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,428  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,428  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,428  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:42,429  DEBUG sleeping    : Transitions
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:42,429  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:42,430  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:42,431  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:19:42,431  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:42,431  DEBUG sleeping    : Location Info
+2021-02-10 23:19:42,431  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:19:42,431  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:19:42,431  DEBUG sleeping    :   height: 677
+2021-02-10 23:19:42,431  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:19:42,431  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:42,431  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:19:42,432  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:42,432  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:42,432  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:42,432  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:42,433  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:42,433  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:42,433  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:42,433  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:42,433  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:42,433  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:42,433  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:19:42,433  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:19:42,434  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:42,434  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:42,434  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:42,434  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:42,434  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:42,435  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:42,435  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:42,435  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:42,435  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:42,435  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:42,435  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:19:42,435  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:42,435  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:19:42,436  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:42,436  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:42,436  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:42,436  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:42,436  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:42,437  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:42,437  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:42,437  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:42,437  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:42,437  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:42,437  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:19:42,437  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:42,437  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:42,438  DEBUG sleeping    :   open_fail_after: None
+2021-02-10 23:19:42,438  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:42,438  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:42,438  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:42,438  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:42,438  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:42,438  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:42,438  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:42,439  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:42,439  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:42,439  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:42,439  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:42,439  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:42,439  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:42,439  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:42,440  DEBUG sleeping    : Exiting state sleeping after 0.2s
+2021-02-10 23:19:42,440   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:42,440   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:19:42,440  DEBUG waiting     : Checking safe
+2021-02-10 23:19:42,442  DEBUG waiting     : Safe? True
+2021-02-10 23:19:42,442  DEBUG waiting     : Checking dark
+2021-02-10 23:19:43,356  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:43,356  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:43,356  DEBUG waiting     : Exiting state waiting after 0.9s
+2021-02-10 23:19:43,356   INFO opening     : Entering state: opening
+2021-02-10 23:19:43,356   INFO opening     : Opening the roof
+2021-02-10 23:19:43,357  DEBUG opening     : Checking safe
+2021-02-10 23:19:43,357  DEBUG opening     : Safe? True
+2021-02-10 23:19:43,357  DEBUG opening     : Checking dark
+2021-02-10 23:19:43,414  DEBUG opening     : Sun is Down? True
+2021-02-10 23:19:43,414  DEBUG opening     : We are not shutting down
+2021-02-10 23:19:43,414  DEBUG opening     : Exiting state opening after 0.1s
+2021-02-10 23:19:43,414   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,414   INFO scheduling  : Got M42
+2021-02-10 23:19:43,414  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,415  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,415  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,450  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,450  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,450  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,450   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,451   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:43,451   INFO acquiring   : Slewing to: M42
+2021-02-10 23:19:43,451   INFO acquiring   : Slew complete
+2021-02-10 23:19:43,451  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:43,452  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:43,452  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:43,490  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:43,490  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:43,490  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,490   INFO configuring : Entering state: configuring
+2021-02-10 23:19:43,490   INFO configuring : configuring instrument: L Filter
+2021-02-10 23:19:43,490  DEBUG configuring : Checking safe
+2021-02-10 23:19:43,491  DEBUG configuring : Safe? True
+2021-02-10 23:19:43,491  DEBUG configuring : Checking dark
+2021-02-10 23:19:43,518  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:43,518  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:43,518  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:43,518   INFO observing   : Entering state: observing
+2021-02-10 23:19:43,519   INFO observing   : starting observation
+2021-02-10 23:19:43,519   INFO observing   : observation complete
+2021-02-10 23:19:43,519  DEBUG observing   : Checking safe
+2021-02-10 23:19:43,519  DEBUG observing   : Safe? True
+2021-02-10 23:19:43,519  DEBUG observing   : Checking dark
+2021-02-10 23:19:43,544  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:43,544  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:43,545  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:43,545   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,545   INFO scheduling  : Got M42
+2021-02-10 23:19:43,545  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,546  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,546  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,573  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,573  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,573  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,573   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,574   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:43,574   INFO acquiring   : Slewing to: M42
+2021-02-10 23:19:43,574   INFO acquiring   : Slew complete
+2021-02-10 23:19:43,574  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:43,575  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:43,575  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:43,603  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:43,603  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:43,603  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,603   INFO configuring : Entering state: configuring
+2021-02-10 23:19:43,603   INFO configuring : configuring instrument: R Filter
+2021-02-10 23:19:43,603  DEBUG configuring : Checking safe
+2021-02-10 23:19:43,604  DEBUG configuring : Safe? True
+2021-02-10 23:19:43,604  DEBUG configuring : Checking dark
+2021-02-10 23:19:43,635  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:43,635  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:43,635  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:43,635   INFO observing   : Entering state: observing
+2021-02-10 23:19:43,636   INFO observing   : starting observation
+2021-02-10 23:19:43,636   INFO observing   : observation complete
+2021-02-10 23:19:43,636  DEBUG observing   : Checking safe
+2021-02-10 23:19:43,636  DEBUG observing   : Safe? True
+2021-02-10 23:19:43,636  DEBUG observing   : Checking dark
+2021-02-10 23:19:43,668  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:43,668  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:43,668  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:43,668   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,668   INFO scheduling  : Got M42
+2021-02-10 23:19:43,668  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,669  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,669  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,699  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,699  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,699  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,699   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,700   INFO acquiring   : Executing Mask Align (None)
+2021-02-10 23:19:43,700  ERROR acquiring   : Did not recognize alignment Mask Align (None)
+2021-02-10 23:19:43,700  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,700   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,700   INFO scheduling  : Got M42
+2021-02-10 23:19:43,700  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,701  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,701  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,729  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,729  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,729  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,729   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,729   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:43,730   INFO acquiring   : Slewing to: M42
+2021-02-10 23:19:43,730   INFO acquiring   : Slew complete
+2021-02-10 23:19:43,730  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:43,730  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:43,731  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:43,757  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:43,758  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:43,758  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,758   INFO configuring : Entering state: configuring
+2021-02-10 23:19:43,758   INFO configuring : configuring instrument: B Filter
+2021-02-10 23:19:43,758  DEBUG configuring : Checking safe
+2021-02-10 23:19:43,759  DEBUG configuring : Safe? True
+2021-02-10 23:19:43,759  DEBUG configuring : Checking dark
+2021-02-10 23:19:43,786  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:43,786  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:43,787  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:43,787   INFO observing   : Entering state: observing
+2021-02-10 23:19:43,787   INFO observing   : starting observation
+2021-02-10 23:19:43,787   INFO observing   : observation complete
+2021-02-10 23:19:43,787  DEBUG observing   : Checking safe
+2021-02-10 23:19:43,788  DEBUG observing   : Safe? True
+2021-02-10 23:19:43,788  DEBUG observing   : Checking dark
+2021-02-10 23:19:43,815  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:43,816  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:43,816  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:43,816   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,816   INFO scheduling  : Got M78
+2021-02-10 23:19:43,817  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,817  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,817  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,842  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,842  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,842  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,842   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,842   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:43,843   INFO acquiring   : Slewing to: M78
+2021-02-10 23:19:43,843   INFO acquiring   : Slew complete
+2021-02-10 23:19:43,843  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:43,843  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:43,844  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:43,869  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:43,870  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:43,870  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,870   INFO configuring : Entering state: configuring
+2021-02-10 23:19:43,870   INFO configuring : configuring instrument: L Filter
+2021-02-10 23:19:43,870  DEBUG configuring : Checking safe
+2021-02-10 23:19:43,870  DEBUG configuring : Safe? True
+2021-02-10 23:19:43,871  DEBUG configuring : Checking dark
+2021-02-10 23:19:43,896  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:43,896  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:43,896  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:43,897   INFO observing   : Entering state: observing
+2021-02-10 23:19:43,897   INFO observing   : starting observation
+2021-02-10 23:19:43,897   INFO observing   : observation complete
+2021-02-10 23:19:43,897  DEBUG observing   : Checking safe
+2021-02-10 23:19:43,897  DEBUG observing   : Safe? True
+2021-02-10 23:19:43,898  DEBUG observing   : Checking dark
+2021-02-10 23:19:43,924  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:43,925  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:43,925  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:43,925   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:43,925   INFO scheduling  : Got M78
+2021-02-10 23:19:43,925  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:43,926  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:43,926  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:43,954  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:43,954  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:43,955  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:43,955   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:43,955   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:43,955   INFO acquiring   : Slewing to: M78
+2021-02-10 23:19:43,955   INFO acquiring   : Slew complete
+2021-02-10 23:19:43,955  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:43,956  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:43,956  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:43,982  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:43,982  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:43,982  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:43,982   INFO configuring : Entering state: configuring
+2021-02-10 23:19:43,983   INFO configuring : configuring instrument: R Filter
+2021-02-10 23:19:43,983  DEBUG configuring : Checking safe
+2021-02-10 23:19:43,983  DEBUG configuring : Safe? True
+2021-02-10 23:19:43,983  DEBUG configuring : Checking dark
+2021-02-10 23:19:44,009  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:44,009  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:44,009  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:44,009   INFO observing   : Entering state: observing
+2021-02-10 23:19:44,009   INFO observing   : starting observation
+2021-02-10 23:19:44,009   INFO observing   : observation complete
+2021-02-10 23:19:44,010  DEBUG observing   : Checking safe
+2021-02-10 23:19:44,010  DEBUG observing   : Safe? True
+2021-02-10 23:19:44,010  DEBUG observing   : Checking dark
+2021-02-10 23:19:44,036  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:44,036  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:44,036  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:44,036   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,037   INFO scheduling  : Got M78
+2021-02-10 23:19:44,037  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:44,037  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:44,037  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:44,064  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:44,065  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:44,065  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,065   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:44,065   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:44,065   INFO acquiring   : Slewing to: M78
+2021-02-10 23:19:44,066   INFO acquiring   : Slew complete
+2021-02-10 23:19:44,066  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:44,066  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:44,066  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:44,092  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:44,093  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:44,093  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:44,093   INFO configuring : Entering state: configuring
+2021-02-10 23:19:44,093   INFO configuring : configuring instrument: G Filter
+2021-02-10 23:19:44,094  DEBUG configuring : Checking safe
+2021-02-10 23:19:44,094  DEBUG configuring : Safe? True
+2021-02-10 23:19:44,094  DEBUG configuring : Checking dark
+2021-02-10 23:19:44,122  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:44,122  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:44,122  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:44,122   INFO observing   : Entering state: observing
+2021-02-10 23:19:44,122   INFO observing   : starting observation
+2021-02-10 23:19:44,122   INFO observing   : observation complete
+2021-02-10 23:19:44,123  DEBUG observing   : Checking safe
+2021-02-10 23:19:44,123  DEBUG observing   : Safe? True
+2021-02-10 23:19:44,123  DEBUG observing   : Checking dark
+2021-02-10 23:19:44,151  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:44,152  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:44,152  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:44,152   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,152   INFO scheduling  : Got M78
+2021-02-10 23:19:44,152  DEBUG scheduling  : Checking safe
+2021-02-10 23:19:44,153  DEBUG scheduling  : Safe? True
+2021-02-10 23:19:44,153  DEBUG scheduling  : Checking dark
+2021-02-10 23:19:44,178  DEBUG scheduling  : Sun is Down? True
+2021-02-10 23:19:44,179  DEBUG scheduling  : We are not shutting down
+2021-02-10 23:19:44,179  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,179   INFO acquiring   : Entering state: acquiring
+2021-02-10 23:19:44,180   INFO acquiring   : Executing Blind Align
+2021-02-10 23:19:44,180   INFO acquiring   : Slewing to: M78
+2021-02-10 23:19:44,180   INFO acquiring   : Slew complete
+2021-02-10 23:19:44,180  DEBUG acquiring   : Checking safe
+2021-02-10 23:19:44,180  DEBUG acquiring   : Safe? True
+2021-02-10 23:19:44,180  DEBUG acquiring   : Checking dark
+2021-02-10 23:19:44,206  DEBUG acquiring   : Sun is Down? True
+2021-02-10 23:19:44,206  DEBUG acquiring   : We are not shutting down
+2021-02-10 23:19:44,206  DEBUG acquiring   : Exiting state acquiring after 0.0s
+2021-02-10 23:19:44,206   INFO configuring : Entering state: configuring
+2021-02-10 23:19:44,207   INFO configuring : configuring instrument: B Filter
+2021-02-10 23:19:44,207  DEBUG configuring : Checking safe
+2021-02-10 23:19:44,207  DEBUG configuring : Safe? True
+2021-02-10 23:19:44,207  DEBUG configuring : Checking dark
+2021-02-10 23:19:44,234  DEBUG configuring : Sun is Down? True
+2021-02-10 23:19:44,234  DEBUG configuring : We are not shutting down
+2021-02-10 23:19:44,234  DEBUG configuring : Exiting state configuring after 0.0s
+2021-02-10 23:19:44,234   INFO observing   : Entering state: observing
+2021-02-10 23:19:44,235   INFO observing   : starting observation
+2021-02-10 23:19:44,235   INFO observing   : observation complete
+2021-02-10 23:19:44,235  DEBUG observing   : Checking safe
+2021-02-10 23:19:44,235  DEBUG observing   : Safe? True
+2021-02-10 23:19:44,235  DEBUG observing   : Checking dark
+2021-02-10 23:19:44,263  DEBUG observing   : Sun is Down? True
+2021-02-10 23:19:44,263  DEBUG observing   : We are not shutting down
+2021-02-10 23:19:44,264  DEBUG observing   : Exiting state observing after 0.0s
+2021-02-10 23:19:44,264   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,264   INFO scheduling  : No more targets
+2021-02-10 23:19:44,264  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,264   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,264   INFO waiting     : waiting 0s (roof is open? True, waitcount = 1)
+2021-02-10 23:19:44,265  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,265  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,265  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,291  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,291  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,291  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,292   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,292   INFO scheduling  : No more targets
+2021-02-10 23:19:44,292  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,292   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,292   INFO waiting     : waiting 0s (roof is open? True, waitcount = 2)
+2021-02-10 23:19:44,292  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,293  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,293  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,319  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,320  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,320  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,320   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,320   INFO scheduling  : No more targets
+2021-02-10 23:19:44,320  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,320   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,321   INFO waiting     : waiting 0s (roof is open? True, waitcount = 3)
+2021-02-10 23:19:44,321  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,321  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,321  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,348  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,348  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,348  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,349   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,349   INFO scheduling  : No more targets
+2021-02-10 23:19:44,349  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,349   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,350   INFO waiting     : waiting 0s (roof is open? True, waitcount = 4)
+2021-02-10 23:19:44,350  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,350  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,350  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,377  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,377  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,378  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,378   INFO scheduling  : Entering state: scheduling
+2021-02-10 23:19:44,378   INFO scheduling  : No more targets
+2021-02-10 23:19:44,379  DEBUG scheduling  : Exiting state scheduling after 0.0s
+2021-02-10 23:19:44,379   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,379   INFO waiting     : Wait count exceeded
+2021-02-10 23:19:44,380  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,380   INFO closing     : Entering state: closing
+2021-02-10 23:19:44,380   INFO closing     : Closing the roof
+2021-02-10 23:19:44,380   INFO closing     : Shutting down
+2021-02-10 23:19:44,380  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:44,381   INFO pau         : Entering state: pau
+2021-02-10 23:19:44,381   INFO pau         : Spent 0.2s in sleeping
+2021-02-10 23:19:44,381   INFO pau         : Spent 1.0s in waiting
+2021-02-10 23:19:44,381   INFO pau         : Spent 0.1s in opening
+2021-02-10 23:19:44,381   INFO pau         : Spent 0.2s in scheduling
+2021-02-10 23:19:44,382   INFO pau         : Spent 0.2s in acquiring
+2021-02-10 23:19:44,382   INFO pau         : Spent 0.2s in configuring
+2021-02-10 23:19:44,382   INFO pau         : Spent 0.2s in observing
+2021-02-10 23:19:44,382   INFO pau         : Spent 0.0s in closing
+2021-02-10 23:19:44,382   INFO Observed:
+2021-02-10 23:19:44,383   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:44,383   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:44,383   INFO   |M42            |Stare x1              |L Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,383   INFO   |M42            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,383   INFO   |M42            |Stare x1              |B Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,383   INFO   |M78            |Stare x1              |L Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,384   INFO   |M78            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,384   INFO   |M78            |Stare x1              |G Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,384   INFO   |M78            |Stare x1              |B Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,384   INFO Failed:
+2021-02-10 23:19:44,384   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:44,385   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:44,385   INFO   |M42            |Stare x1              |R Filter                                     |[CMOSCamera 300s x12]               |Blind Align         
+2021-02-10 23:19:44,388   INFO sleeping    : Waking up observatory: hokuula
+2021-02-10 23:19:44,388  DEBUG sleeping    : States
+2021-02-10 23:19:44,388  DEBUG sleeping    :   {'name': 'sleeping', 'on_enter': ['entry_timestamp'], 'on_exit': ['log_wakeup', 'exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,388  DEBUG sleeping    :   {'name': 'waiting', 'on_enter': ['entry_timestamp', 'wait_for'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,388  DEBUG sleeping    :   {'name': 'opening', 'on_enter': ['entry_timestamp', 'open_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,389  DEBUG sleeping    :   {'name': 'scheduling', 'on_enter': ['entry_timestamp', 'get_OB'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,389  DEBUG sleeping    :   {'name': 'acquiring', 'on_enter': ['entry_timestamp', 'begin_acquisition'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,389  DEBUG sleeping    :   {'name': 'configuring', 'on_enter': ['entry_timestamp', 'configure_instrument'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,389  DEBUG sleeping    :   {'name': 'observing', 'on_enter': ['entry_timestamp', 'begin_observation'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,389  DEBUG sleeping    :   {'name': 'closing', 'on_enter': ['entry_timestamp', 'close_roof'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'name': 'pau', 'on_enter': ['entry_timestamp', 'night_summary'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'name': 'alert', 'on_enter': ['entry_timestamp'], 'on_exit': ['exit_timestamp'], 'ignore_invalid_triggers': None}
+2021-02-10 23:19:44,390  DEBUG sleeping    : Transitions
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'trigger': 'wake_up', 'source': ['sleeping', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'trigger': 'open', 'source': 'waiting', 'dest': 'opening', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'trigger': 'select_OB', 'source': ['opening', 'waiting', 'observing'], 'dest': 'scheduling', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'trigger': 'acquire', 'source': 'scheduling', 'dest': 'acquiring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:44,390  DEBUG sleeping    :   {'trigger': 'configure', 'source': 'acquiring', 'dest': 'configuring', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:44,391  DEBUG sleeping    :   {'trigger': 'observe', 'source': 'configuring', 'dest': 'observing', 'conditions': ['is_safe', 'is_dark', 'not_shutting_down']}
+2021-02-10 23:19:44,391  DEBUG sleeping    :   {'trigger': 'close', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:44,391  DEBUG sleeping    :   {'trigger': 'shutdown', 'source': 'closing', 'dest': 'pau', 'conditions': []}
+2021-02-10 23:19:44,391  DEBUG sleeping    :   {'trigger': 'wait', 'source': ['scheduling', 'closing'], 'dest': 'waiting', 'conditions': []}
+2021-02-10 23:19:44,391  DEBUG sleeping    :   {'trigger': 'failed_opening', 'source': 'opening', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:44,392  DEBUG sleeping    :   {'trigger': 'failed_acquisition', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:44,392  DEBUG sleeping    :   {'trigger': 'failed_slew', 'source': 'acquiring', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:44,392  DEBUG sleeping    :   {'trigger': 'failed_to_configure', 'source': 'configuring', 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:44,392  DEBUG sleeping    :   {'trigger': 'failed_observation', 'source': 'observing', 'dest': 'scheduling', 'conditions': []}
+2021-02-10 23:19:44,392  DEBUG sleeping    :   {'trigger': 'critical_failure', 'source': 'closing', 'dest': 'alert', 'conditions': []}
+2021-02-10 23:19:44,393  DEBUG sleeping    :   {'trigger': 'unsafe', 'source': ['opening', 'scheduling', 'acquiring', 'configuring', 'observing', 'waiting'], 'dest': 'closing', 'conditions': []}
+2021-02-10 23:19:44,393  DEBUG sleeping    : Location Info
+2021-02-10 23:19:44,393  DEBUG sleeping    :   lat: 20.028790056
+2021-02-10 23:19:44,393  DEBUG sleeping    :   lon: -155.714876639
+2021-02-10 23:19:44,393  DEBUG sleeping    :   height: 677
+2021-02-10 23:19:44,394  DEBUG sleeping    : Roof parameters:
+2021-02-10 23:19:44,394  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:44,394  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:44,394  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:44,394  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:44,394  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:44,395  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:44,395  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:44,395  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:44,395  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:44,395  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:44,395  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:44,395  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:44,395  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:44,396  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:44,396  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    : Telescope parameters:
+2021-02-10 23:19:44,396  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:44,396  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:44,397  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:44,397  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:44,397  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:44,397  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:44,397  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:44,397  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:44,397  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:44,397  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:44,398  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:44,398  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    : Instrument parameters:
+2021-02-10 23:19:44,398  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:44,398  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:44,399  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:44,399  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:44,399  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:44,400  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:44,400  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:44,400  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:44,400  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:44,400  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:44,400  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:44,400  DEBUG sleeping    : Detector parameters:
+2021-02-10 23:19:44,401  DEBUG sleeping    :   roof_time_to_open: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   roof_time_to_close: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   open_fail_after: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   open_random_fail_rate: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   close_fail_after: None
+2021-02-10 23:19:44,401  DEBUG sleeping    :   close_random_fail_rate: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   time_to_slew: 0
+2021-02-10 23:19:44,401  DEBUG sleeping    :   time_to_park: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    :   slew_fail_after: None
+2021-02-10 23:19:44,402  DEBUG sleeping    :   slew_random_fail_rate: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    :   park_fail_after: None
+2021-02-10 23:19:44,402  DEBUG sleeping    :   park_random_fail_rate: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    :   configure_fail_after: None
+2021-02-10 23:19:44,402  DEBUG sleeping    :   configure_random_fail_rate: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    :   exposure_overhead: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    :   expose_fail_after: None
+2021-02-10 23:19:44,402  DEBUG sleeping    :   expose_random_fail_rate: 0
+2021-02-10 23:19:44,402  DEBUG sleeping    : Exiting state sleeping after 2.0s
+2021-02-10 23:19:44,402   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,402   INFO waiting     : waiting 0s (roof is open? False, waitcount = 1)
+2021-02-10 23:19:44,403  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,403  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,403  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,430  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,430  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,430  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,430   INFO opening     : Entering state: opening
+2021-02-10 23:19:44,431   INFO opening     : Opening the roof
+2021-02-10 23:19:44,431  ERROR opening     : Problem opening roof!
+2021-02-10 23:19:44,431  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:19:44,431   INFO closing     : Entering state: closing
+2021-02-10 23:19:44,431   INFO closing     : Closing the roof
+2021-02-10 23:19:44,432   INFO closing     : Going to wait
+2021-02-10 23:19:44,432  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:44,433   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,433   INFO waiting     : waiting 0s (roof is open? False, waitcount = 2)
+2021-02-10 23:19:44,433  DEBUG waiting     : Checking safe
+2021-02-10 23:19:44,434  DEBUG waiting     : Safe? True
+2021-02-10 23:19:44,434  DEBUG waiting     : Checking dark
+2021-02-10 23:19:44,462  DEBUG waiting     : Sun is Down? True
+2021-02-10 23:19:44,462  DEBUG waiting     : We are not shutting down
+2021-02-10 23:19:44,462  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,462   INFO opening     : Entering state: opening
+2021-02-10 23:19:44,462   INFO opening     : Opening the roof
+2021-02-10 23:19:44,462  ERROR opening     : Problem opening roof!
+2021-02-10 23:19:44,463  DEBUG opening     : Exiting state opening after 0.0s
+2021-02-10 23:19:44,463   INFO closing     : Entering state: closing
+2021-02-10 23:19:44,463   INFO closing     : Closing the roof
+2021-02-10 23:19:44,463   INFO closing     : Going to wait
+2021-02-10 23:19:44,463  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:44,463   INFO waiting     : Entering state: waiting
+2021-02-10 23:19:44,463   INFO waiting     : Too may errors
+2021-02-10 23:19:44,464  DEBUG waiting     : Exiting state waiting after 0.0s
+2021-02-10 23:19:44,464   INFO closing     : Entering state: closing
+2021-02-10 23:19:44,464   INFO closing     : Closing the roof
+2021-02-10 23:19:44,464   INFO closing     : Shutting down
+2021-02-10 23:19:44,464  DEBUG closing     : Exiting state closing after 0.0s
+2021-02-10 23:19:44,464   INFO pau         : Entering state: pau
+2021-02-10 23:19:44,464   INFO pau         : Spent 2.0s in sleeping
+2021-02-10 23:19:44,465   INFO pau         : Spent 0.1s in waiting
+2021-02-10 23:19:44,465   INFO pau         : Spent 0.0s in opening
+2021-02-10 23:19:44,465   INFO pau         : Spent 0.0s in closing
+2021-02-10 23:19:44,465   INFO Observed:
+2021-02-10 23:19:44,465   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:44,466   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------
+2021-02-10 23:19:44,466   INFO Failed:
+2021-02-10 23:19:44,466   INFO   |Target         |Pattern               |InstrumentConfig                             |DetectorConfig                      |AlignmentMethod     
+2021-02-10 23:19:44,467   INFO   |---------------|----------------------|---------------------------------------------|------------------------------------|--------------------

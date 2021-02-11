@@ -4,8 +4,7 @@
   - sleeping
   - closing
   dest: waiting
-  conditions:
-  - not_shutting_down
+  conditions: []
 - trigger: open
   source: waiting
   dest: opening
