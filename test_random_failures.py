@@ -36,18 +36,19 @@ simulator_config = {'roof_time_to_open': 0,
                     'time_to_park': 0,
                     'exposure_overhead': 0,
                     'open_fail_after': None,
-                    'open_random_fail_rate': 0,
-                    'close_fail_after': 0,
-                    'close_random_fail_rate': 0,
+                    'open_random_fail_rate': 0.02,
+                    'close_fail_after': None,
+                    'close_random_fail_rate': 0.02,
                     'slew_fail_after': None,
-                    'slew_random_fail_rate': 0,
+                    'slew_random_fail_rate': 0.02,
                     'park_fail_after': None,
-                    'park_random_fail_rate': 0,
+                    'park_random_fail_rate': 0.02,
                     'configure_fail_after': None,
-                    'configure_random_fail_rate': 0,
+                    'configure_random_fail_rate': 0.02,
                     'expose_fail_after': None,
-                    'expose_random_fail_rate': 0}
+                    'expose_random_fail_rate': 0.02}
 config['waittime'] = 0
+config['max_allowed_errors'] = 3
 config['Weather'] = Weather
 config['Roof'] = Roof
 config['Telescope'] = Telescope
@@ -59,24 +60,15 @@ config['instrument_config'] = simulator_config
 config['detector_config'] = simulator_config
 
 
-def test_roof_close_failure():
+import pytest
+@pytest.mark.parametrize("test_input,expected", [(None, None)]*100)
+def test_random_failures(test_input, expected):
     obs = RollOffRoof(**config)
     obs.wake_up()
-    assert obs.state == 'alert'
-    assert obs.we_are_done is True
-    assert obs.error_count <= config['max_allowed_errors']+1
-
-
-def test_roof_close_failure_with_other_failures():
-    simulator_config['slew_fail_after'] = 2
-    config['telescope_config'] = simulator_config
-    obs = RollOffRoof(**config)
-    obs.wake_up()
-    assert obs.state == 'alert'
-    assert obs.we_are_done is True
+    assert (obs.state == 'pau' or obs.state == 'alert') == True
+    assert obs.we_are_done == True
     assert obs.error_count <= config['max_allowed_errors']+1
 
 
 if __name__ == '__main__':
-    test_roof_close_failure()
-    test_roof_close_failure_with_other_failures()
+    test_random_failures(0, (True, True))
