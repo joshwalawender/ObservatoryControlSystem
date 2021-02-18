@@ -34,6 +34,12 @@
   - configure_instrument
   on_exit:
   - exit_timestamp
+- name: focusing
+  on_enter:
+  - entry_timestamp
+  - begin_focusing
+  on_exit:
+  - exit_timestamp
 - name: observing
   on_enter:
   - entry_timestamp

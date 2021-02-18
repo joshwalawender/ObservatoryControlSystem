@@ -9,6 +9,7 @@ import yaml
 from astropy import units as u
 from astropy import coordinates as c
 from astropy.time import Time
+from astropy.table import Table, Row
 
 # Suppress IERS download failure
 from astropy.utils.iers import conf
@@ -18,11 +19,11 @@ from transitions.extensions import GraphMachine as Machine
 # from transitions import Machine
 from transitions import State
 
-from odl.block import ObservingBlockList
+from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
 from odl.alignment import BlindAlign
 
 from . import (RoofFailure, TelescopeFailure, AcquisitionFailure,
-               InstrumentFailure, DetectorFailure)
+               InstrumentFailure, DetectorFailure, FocusFitParabola)
 from .scheduler import Scheduler
 
 
@@ -98,9 +99,14 @@ class RollOffRoof():
                                use_pygraphviz=True,
                                )
         # Initialize Status Values
+        self.startup_at = datetime.now()
         self.entered_state_at = datetime.now()
-        self.observed = ObservingBlockList([])
-        self.failed = ObservingBlockList([])
+        self.observed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig'),
+                              dtype=('a20', 'a40', 'a20', 'a40', 'a40'))
+        self.failed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig'),
+                              dtype=('a20', 'a40', 'a20', 'a40', 'a40'))
+        self.observed_OBs = ObservingBlockList([])
+        self.failed_OBs = ObservingBlockList([])
         self.next_OB = None
         self.current_OB = None
         self.waitcount = 0
@@ -155,6 +161,22 @@ class RollOffRoof():
         self.log(f'Detector parameters:', logging.DEBUG)
         for key in self.detector.config.keys():
             self.log(f'  {key}: {self.detector.config.get(key)}', logging.DEBUG)
+
+
+    def record_OB(self, failed=False):
+        row = {'type': self.current_OB.blocktype,
+               'target': self.current_OB.target.name,
+               'pattern': self.current_OB.pattern.name,
+               'instconfig': self.current_OB.instconfig.name,
+               'detconfig': ','.join([dc.name for dc in self.current_OB.detconfig])}
+        if failed is True:
+            self.log('OB Failed')
+            self.failed_OBs.append(self.current_OB)
+            self.failed.add_row(row)
+        else:
+            self.log('OB Succeeded')
+            self.observed_OBs.append(self.current_OB)
+            self.observed.add_row(row)
 
 
     ##-------------------------------------------------------------------------
@@ -296,7 +318,7 @@ class RollOffRoof():
         else:
             self.log(f"Did not recognize alignment {self.next_OB.align.name}",
                      level=logging.ERROR)
-            self.failed.append(self.current_OB)
+            self.record_OB(failed=True)
             self.failed_acquisition()
 
 
@@ -328,7 +350,34 @@ class RollOffRoof():
             self.instrument.configure(self.next_OB.instconfig)
         except InstrumentFailure:
             self.log('Instrument configuration failed', level=logging.ERROR)
-        self.observe()
+
+        if isinstance(self.next_OB, FocusBlock):
+            self.focus()
+        elif isinstance(self.next_OB, ScienceBlock):
+            self.observe()
+
+
+    def begin_focusing(self):
+        self.log('starting focusing')
+        self.current_OB = self.next_OB
+        self.next_OB = None
+
+        if isinstance(self.current_OB, FocusFitParabola):
+            self.log(f'  Taking focus exposures')
+            for i in range(self.current_OB.n_focus_points):
+                try:
+                    self.detector.expose(self.current_OB.detconfig)
+                except DetectorFailure:
+                    self.log('Detector failure', level=logging.ERROR)
+                    self.error_count += 1
+
+            self.log(f'  Analyzing focus exposures')
+            self.log(f'  Moving to final focus')
+            self.record_OB()
+        else:
+            self.log(f'Focus strategy {self.next_OB} is unknown', level=logging.ERROR)
+            self.record_OB(failed=True)
+        self.select_OB()
 
 
     def begin_observation(self):
@@ -343,12 +392,7 @@ class RollOffRoof():
         else:
 #             ok = self.check_ok()
             ok = True
-            if ok is True:
-                self.log('observation complete')
-                self.observed.append(self.current_OB)
-            else:
-                self.log('observation failed')
-                self.failed.append(self.current_OB)
+            self.record_OB(failed=not ok)
         self.select_OB()
 
 
@@ -359,11 +403,14 @@ class RollOffRoof():
 
 
     def night_summary(self):
+        if self.error_count > 0:
+            log.warning(f'Encountered {self.error_count} errors')
+
+        total_duration = (datetime.now() - self.startup_at).total_seconds()
         for state in self.durations.keys():
-            self.log(f'Spent {self.durations[state]:.1f}s in {state}')
-        log.info('Observed:')
-        for line in str(self.observed).split('\n'):
-            log.info('  |'+line)
-        log.info('Failed:')
-        for line in str(self.failed).split('\n'):
-            log.info('  |'+line)
+            duration = self.durations[state]
+            pct = duration / total_duration * 100
+            self.log(f'Spent {duration:.1f}s in {state} ({pct:.1f} %)')
+
+        log.info(f'\n\n====== Observed ======\n{self.observed}\n')
+        log.info(f'\n\n======  Failed  ======\n{self.failed}\n')

@@ -1,5 +1,6 @@
 from odl.detector_config import VisibleDetectorConfig
 from odl.instrument_config import InstrumentConfig
+from odl.block import FocusBlock
 
 
 ##-------------------------------------------------------------------------
@@ -49,5 +50,3 @@ class SVQ100_ZWO(InstrumentConfig):
         cals.append(self.biases())
 #         cals.append(self.domeflats())
         return cals
-
-
