@@ -113,6 +113,8 @@ class RollOffRoof():
         self.we_are_done = False
         self.durations = {}
         self.error_count = 0
+        # Generate state diagram
+        self.machine.get_graph().draw('state_diagram.png', prog='dot')
 
 
     ##-------------------------------------------------------------------------

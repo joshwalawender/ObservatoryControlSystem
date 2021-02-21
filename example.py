@@ -31,5 +31,4 @@ config['Detector'] = Detector
 config['detector_config'] = simulator_config
 
 obs = RollOffRoof(**config)
-obs.machine.get_graph().draw('state_diagram.png', prog='dot')
 obs.wake_up()
