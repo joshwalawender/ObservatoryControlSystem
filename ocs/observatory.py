@@ -409,10 +409,18 @@ class RollOffRoof():
             log.warning(f'Encountered {self.error_count} errors')
 
         total_duration = (datetime.now() - self.startup_at).total_seconds()
+        duration_table = Table(names=('State', 'Duration', 'Percent'),
+                               dtype=(np.str, np.float, np.float))
         for state in self.durations.keys():
-            duration = self.durations[state]
-            pct = duration / total_duration * 100
-            self.log(f'Spent {duration:.1f}s in {state} ({pct:.1f} %)')
+#             duration = self.durations[state]
+#             pct = duration / total_duration * 100
+#             self.log(f'Spent {duration:.1f}s in {state} ({pct:.1f} %)')
+            row = {'State': state,
+                   'Duration': self.durations[state],
+                   'Percent': self.durations[state] / total_duration * 100}
+            duration_table.add_row(row)
+            print(row)
+        log.info(f'\n\n====== Timing ======\n{duration_table}\n')
 
         log.info(f'\n\n====== Observed ======\n{self.observed}\n')
         log.info(f'\n\n======  Failed  ======\n{self.failed}\n')
