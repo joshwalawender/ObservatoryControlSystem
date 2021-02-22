@@ -1,111 +1,143 @@
-# Normal Operations
+# Wake Up
 - trigger: wake_up
-  source: 
-  - sleeping
-  - closing
-  dest: waiting
-  conditions: []
-- trigger: open
-  source: waiting
-  dest: opening
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: select_OB
-  source:
-  - opening
-  - waiting
-  - observing
-  - focusing
-  dest: scheduling
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: acquire
-  source: scheduling
-  dest: acquiring
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: configure
-  source: acquiring
-  dest: configuring
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: focus
-  source: configuring
-  dest: focusing
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: observe
-  source: configuring
-  dest: observing
-  conditions:
-  - is_safe
-  - is_dark
-  - not_shutting_down
-- trigger: close
-  source:
-  - opening
-  - scheduling
-  - acquiring
-  - configuring
-  - observing
-  - waiting
-  dest: closing
-  conditions: []
-- trigger: shutdown
-  source: closing
-  dest: pau
-  conditions: []
-- trigger: wait
-  source:
-  - scheduling
-  - closing
-  dest: waiting
-  conditions: []
-
-# Failures
-- trigger: failed_opening
-  source: opening
-  dest: closing
-  conditions: []
-- trigger: failed_acquisition
-  source: acquiring
-  dest: scheduling
-  conditions: []
-- trigger: failed_slew
-  source: acquiring
-  dest: scheduling
-  conditions: []
-- trigger: failed_to_configure
-  source: configuring
-  dest: closing
-  conditions: []
-- trigger: failed_observation
-  source: observing
-  dest: scheduling
-  conditions: []
-- trigger: critical_failure
-  source: closing
+  source: [sleeping, closing]
+  dest: waiting_closed
+  conditions: [roof_ok]
+- trigger: wake_up
+  source: [sleeping, closing]
   dest: alert
   conditions: []
 
-# Unsafe
-- trigger: unsafe
-  source:
-  - opening
-  - scheduling
-  - acquiring
-  - configuring
-  - observing
-  - waiting
-  dest: closing
+# Done Waiting
+- trigger: done_waiting
+  source: waiting_closed
+  dest: pau
+  conditions: [end_of_night]
+- trigger: done_waiting
+  source: waiting_closed
+  dest: opening
+  conditions: ok_to_observe
+- trigger: done_waiting
+  source: waiting_closed
+  dest: waiting_closed
   conditions: []
+
+# Done Opening
+- trigger: done_opening
+  source: opening
+  dest: waiting_open
+  conditions: []
+
+# Select OB
+- trigger: select_OB
+  source: waiting_open
+  dest: closing
+  conditions: [end_of_night]
+- trigger: select_OB
+  source: waiting_open
+  dest: scheduling
+  conditions: ok_to_observe
+- trigger: select_OB
+  source: waiting_open
+  dest: waiting_open
+  conditions: []
+
+# Acquire
+- trigger: acquire
+  source: scheduling
+  dest: acquiring
+  conditions: [ok_to_observe, have_target]
+- trigger: acquire
+  source: scheduling
+  dest: waiting_open
+  conditions: [ok_to_observe]
+- trigger: acquire
+  source: scheduling
+  dest: closing
+  conditions: [no_targets]
+
+# Done Acquiring
+- trigger: done_acquiring
+  source: acquiring
+  dest: configuring
+  conditions: []
+- trigger: done_acquiring
+  source: acquiring
+  dest: waiting_open
+  conditions: [acquisition_failed]
+
+# Start Observation
+- trigger: start_observation
+  source: configuring
+  dest: focusing
+  conditions: [focus_next, ok_to_observe]
+- trigger: start_observation
+  source: configuring
+  dest: observing
+  conditions: [ok_to_observe]
+
+# Observation Complete
+- trigger: observation_complete
+  source: observing
+  dest: waiting_open
+  conditions: []
+
+# Focusing Complete
+- trigger: focusing_complete
+  source: focusing
+  dest: waiting_open
+  conditions: []
+- trigger: focusing_complete
+  source: focusing
+  dest: focusing
+  conditions: [focus_failed]
+
+
+#- trigger: close
+#  source: [opening, scheduling, acquiring, configuring, observing, waiting_open]
+#  dest: closing
+#  conditions: []
+#- trigger: shutdown
+#  source: closing
+#  dest: pau
+#  conditions: []
+#- trigger: wait_open
+#  source: scheduling
+#  dest: waiting_open
+#  conditions: []
+#- trigger: wait_closed
+#  source: closing
+#  dest: waiting_closed
+#  conditions: []
+#
+## Failures
+#- trigger: failed_opening
+#  source: opening
+#  dest: closing
+#  conditions: []
+#- trigger: failed_acquisition
+#  source: acquiring
+#  dest: scheduling
+#  conditions: []
+#- trigger: failed_slew
+#  source: acquiring
+#  dest: scheduling
+#  conditions: []
+#- trigger: failed_to_configure
+#  source: configuring
+#  dest: closing
+#  conditions: []
+#- trigger: failed_observation
+#  source: observing
+#  dest: scheduling
+#  conditions: []
+#- trigger: critical_failure
+#  source: closing
+#  dest: alert
+#  conditions: []
+#
+## Unsafe
+#- trigger: unsafe
+#  source: [opening, scheduling, acquiring, configuring, observing, waiting_open]
+#  dest: closing
+#  conditions: []

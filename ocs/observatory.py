@@ -23,7 +23,8 @@ from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
 from odl.alignment import BlindAlign
 
 from . import (RoofFailure, TelescopeFailure, AcquisitionFailure,
-               InstrumentFailure, DetectorFailure, FocusFitParabola)
+               InstrumentFailure, DetectorFailure, FocusFitParabola,
+               SchedulingFailure)
 from .scheduler import Scheduler
 
 
@@ -97,22 +98,21 @@ class RollOffRoof():
                                transitions=self.transitions,
                                initial=initial_state,
                                use_pygraphviz=True,
+                               show_conditions=True,
                                )
         # Initialize Status Values
         self.startup_at = datetime.now()
         self.entered_state_at = datetime.now()
-        self.observed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig'),
-                              dtype=('a20', 'a40', 'a20', 'a40', 'a40'))
-        self.failed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig'),
-                              dtype=('a20', 'a40', 'a20', 'a40', 'a40'))
-        self.observed_OBs = ObservingBlockList([])
-        self.failed_OBs = ObservingBlockList([])
+        self.executed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig', 'failed'),
+                              dtype=('a20', 'a40', 'a20', 'a40', 'a40', np.bool))
         self.next_OB = None
         self.current_OB = None
         self.waitcount = 0
         self.we_are_done = False
         self.durations = {}
+        self.errors = []
         self.error_count = 0
+        self.software_errors = []
         # Generate state diagram
         self.machine.get_graph().draw('state_diagram.png', prog='dot')
 
@@ -120,7 +120,7 @@ class RollOffRoof():
     ##-------------------------------------------------------------------------
     ## Utilities
     def log(self, msg, level=logging.INFO):
-        log.log(level, f'{self.state:12s}: {msg}')
+        log.log(level, f'{self.state:15s}: {msg}')
 
 
     def entry_timestamp(self):
@@ -170,15 +170,12 @@ class RollOffRoof():
                'target': self.current_OB.target.name,
                'pattern': self.current_OB.pattern.name,
                'instconfig': self.current_OB.instconfig.name,
-               'detconfig': ','.join([dc.name for dc in self.current_OB.detconfig])}
-        if failed is True:
-            self.log('OB Failed')
-            self.failed_OBs.append(self.current_OB)
-            self.failed.add_row(row)
-        else:
-            self.log('OB Succeeded')
-            self.observed_OBs.append(self.current_OB)
-            self.observed.add_row(row)
+               'detconfig': ','.join([dc.name for dc in self.current_OB.detconfig]),
+               'failed': failed}
+        self.executed.add_row(row)
+        sorf_string = {False: 'Succeeded', True: 'Failed'}[failed]
+        sorf_level = {False: logging.INFO, True: logging.WARNING}[failed]
+        self.log(f'OB {sorf_string}', level=sorf_level)
 
 
     ##-------------------------------------------------------------------------
@@ -221,10 +218,61 @@ class RollOffRoof():
         return self.weather.has_been_safe(self.entered_state_at)
 
 
+    def ok_to_observe(self):
+        return self.is_safe() and self.is_dark() and self.not_shutting_down()
+
+
+    def end_of_night(self):
+        return not self.is_dark()
+
+
+    def is_unsafe(self):
+        return not self.is_safe()
+
+
+    def have_target(self):
+        return self.next_OB is not None
+
+
+    def acquisition_failed(self):
+        acq_warnings = [isinstance(w, AcquisitionFailure) for w in self.errors]
+        return np.any(acq_warnings)
+
+
+    def focus_next(self):
+        return isinstance(self.next_OB, FocusBlock)
+
+
+    def focus_failed(self):
+        foc_warnings = [isinstance(w, FocusFailure) for w in self.errors]
+        return np.any(foc_warnings)
+
+
+    def roof_ok(self):
+        roof_errors = [isinstance(w, RoofFailure) for w in self.errors]
+        return not np.any(roof_errors)
+
+
+    def no_targets(self):
+        sched_errs = [isinstance(w, SchedulingFailure) for w in self.software_errors]
+        n_sched_errs = np.sum(sched_errs)
+        self.log(f'Failed scheduling requests: {n_sched_errs}')
+        return n_sched_errs > 10
+
+
     ##-------------------------------------------------------------------------
     ## Timing Controls
     def wait_for(self):
+        sleep(self.waittime)
+        if self.state == 'waiting_closed':
+            self.done_waiting()
+        elif self.state == 'waiting_open':
+            self.select_OB()
+
+
+    def old_wait_for(self):
         self.waitcount += 1
+        sleep(1)
         if self.waitcount > self.maxwaits:
             self.log('Wait count exceeded')
             self.begin_end_of_night_shutdown()
@@ -243,7 +291,7 @@ class RollOffRoof():
             if self.roof.is_open == True:
                 self.select_OB()
             else:
-                self.open()
+                self.open_roof()
 
 
     def reset_waitcount(self):
@@ -256,12 +304,11 @@ class RollOffRoof():
         self.log('Opening the roof')
         try:
             self.roof.open()
-        except RoofFailure:
+        except RoofFailure as err:
             self.log('Problem opening roof!', level=logging.ERROR)
+            self.errors.append(err)
             self.error_count += 1
-            self.failed_opening()
-        else:
-            self.select_OB()
+        self.done_opening()
 
 
     def close_roof(self):
@@ -270,31 +317,21 @@ class RollOffRoof():
             self.roof.close()
         except RoofFailure:
             self.log('Roof failure on closing', logging.ERROR)
-            self.critical_failure()
-        else:
-            if self.we_are_done is True:
-                self.log('Shutting down')
-                self.shutdown()
-            else:
-                self.log('Going to wait')
-                self.wake_up()
+            self.errors.append(err)
+            self.error_count += 1
+        self.wake_up()
 
 
     ##-------------------------------------------------------------------------
     ## Scheduling
     def get_OB(self):
-        if self.we_are_done is True:
-            self.log('We are done')
-            self.close()
-        else:
+        try:
             self.next_OB = self.scheduler.select()
-            if self.next_OB is None:
-                self.log(f'No more targets')
-                self.wait()
-            else:
-                self.log(f'Got {self.next_OB.target}')
-                self.reset_waitcount()
-                self.acquire()
+        except SchedulingFailure as err:
+            self.log(f'Scheduling error: {err}', level=logging.ERROR)
+            self.software_errors.append(err)
+
+        self.acquire()
 
 
     ##-------------------------------------------------------------------------
@@ -307,21 +344,21 @@ class RollOffRoof():
             self.log(f'Slewing to: {self.next_OB.target}')
             try:
                 self.telescope.slew(self.next_OB.target)
-            except TelescopeFailure:
+            except TelescopeFailure as err:
                 self.log('Telescope slew failed', level=logging.ERROR)
+                self.errors.append(err)
                 self.error_count += 1
-                self.failed_slew()
             else:
                 self.log('Slew complete')
                 self.current_target = self.next_OB.target
                 # End of Acquisition
-                self.configure()
         # Other Align methods go here
         else:
-            self.log(f"Did not recognize alignment {self.next_OB.align.name}",
-                     level=logging.ERROR)
+            msg = f"Did not recognize alignment {self.next_OB.align.name}"
+            self.log(msg, level=logging.ERROR)
+            self.errors.append(AcquisitionFailure(msg))
             self.record_OB(failed=True)
-            self.failed_acquisition()
+        self.done_acquiring()
 
 
     def park_telescope(self):
@@ -350,13 +387,11 @@ class RollOffRoof():
         self.log(f'configuring instrument: {self.next_OB.instconfig}')
         try:
             self.instrument.configure(self.next_OB.instconfig)
-        except InstrumentFailure:
+        except InstrumentFailure as err:
             self.log('Instrument configuration failed', level=logging.ERROR)
-
-        if isinstance(self.next_OB, FocusBlock):
-            self.focus()
-        elif isinstance(self.next_OB, ScienceBlock):
-            self.observe()
+            self.errors.append(err)
+            self.error_count += 1
+        self.start_observation()
 
 
     def begin_focusing(self):
@@ -395,7 +430,7 @@ class RollOffRoof():
 #             ok = self.check_ok()
             ok = True
             self.record_OB(failed=not ok)
-        self.select_OB()
+        self.observation_complete()
 
 
     ##-------------------------------------------------------------------------
@@ -412,15 +447,10 @@ class RollOffRoof():
         duration_table = Table(names=('State', 'Duration', 'Percent'),
                                dtype=(np.str, np.float, np.float))
         for state in self.durations.keys():
-#             duration = self.durations[state]
-#             pct = duration / total_duration * 100
-#             self.log(f'Spent {duration:.1f}s in {state} ({pct:.1f} %)')
             row = {'State': state,
                    'Duration': self.durations[state],
                    'Percent': self.durations[state] / total_duration * 100}
             duration_table.add_row(row)
-            print(row)
         log.info(f'\n\n====== Timing ======\n{duration_table}\n')
-
         log.info(f'\n\n====== Observed ======\n{self.observed}\n')
         log.info(f'\n\n======  Failed  ======\n{self.failed}\n')

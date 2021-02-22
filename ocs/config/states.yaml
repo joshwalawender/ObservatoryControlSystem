@@ -4,7 +4,13 @@
   on_exit:
   - log_wakeup
   - exit_timestamp
-- name: waiting
+- name: waiting_closed
+  on_enter:
+  - entry_timestamp
+  - wait_for
+  on_exit:
+  - exit_timestamp
+- name: waiting_open
   on_enter:
   - entry_timestamp
   - wait_for

@@ -4,12 +4,16 @@ import logging
 from odl.block import FocusBlock
 
 
-class EquipmentFailure(Exception): pass
-class RoofFailure(EquipmentFailure): pass
-class TelescopeFailure(EquipmentFailure): pass
-class AcquisitionFailure(EquipmentFailure): pass
-class InstrumentFailure(EquipmentFailure): pass
-class DetectorFailure(EquipmentFailure): pass
+class HardwareFailure(Exception): pass
+class RoofFailure(HardwareFailure): pass
+class TelescopeFailure(HardwareFailure): pass
+class InstrumentFailure(HardwareFailure): pass
+class DetectorFailure(HardwareFailure): pass
+class FocusFailure(HardwareFailure): pass
+
+class SoftwareFailure(Exception): pass
+class SchedulingFailure(SoftwareFailure): pass
+class AcquisitionFailure(SoftwareFailure): pass
 
 
 ##-------------------------------------------------------------------------
