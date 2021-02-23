@@ -2,7 +2,7 @@
 from time import sleep
 import random
 
-from .. import DetectorFailure
+from ..exceptions import *
 
 
 class Detector():

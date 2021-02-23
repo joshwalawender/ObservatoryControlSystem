@@ -2,7 +2,7 @@
 from time import sleep
 import random
 
-from .. import TelescopeFailure
+from ..exceptions import *
 
 
 class Telescope():

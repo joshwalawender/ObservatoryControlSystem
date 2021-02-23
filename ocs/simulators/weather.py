@@ -5,6 +5,8 @@ from datetime import datetime
 import random
 import numpy as np
 
+from ..exceptions import *
+
 
 class Weather():
     def __init__(self, config={}):

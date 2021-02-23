@@ -1,6 +1,8 @@
 #!python3
 from time import sleep
 
+from ..exceptions import *
+
 
 class Instrument():
     def __init__(self, config={}):
