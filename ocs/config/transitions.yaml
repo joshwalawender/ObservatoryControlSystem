@@ -1,22 +1,22 @@
 # Wake Up
 - trigger: wake_up
-  source: [sleeping, closing]
-  dest: waiting_closed
-  conditions: [roof_ok]
-- trigger: wake_up
-  source: [sleeping, closing]
+  source: sleeping
   dest: alert
+  conditions: [roof_err]
+- trigger: wake_up
+  source: sleeping
+  dest: waiting_closed
   conditions: []
 
 # Done Waiting
 - trigger: done_waiting
   source: waiting_closed
   dest: pau
-  conditions: [end_of_night]
+  conditions: [done_observing]
 - trigger: done_waiting
   source: waiting_closed
   dest: opening
-  conditions: ok_to_observe
+  conditions: [ready_to_open]
 - trigger: done_waiting
   source: waiting_closed
   dest: waiting_closed
@@ -25,36 +25,26 @@
 # Done Opening
 - trigger: done_opening
   source: opening
-  dest: waiting_open
-  conditions: []
-
-# Select OB
-- trigger: select_OB
-  source: waiting_open
   dest: closing
-  conditions: [end_of_night]
-- trigger: select_OB
-  source: waiting_open
-  dest: scheduling
-  conditions: ok_to_observe
-- trigger: select_OB
-  source: waiting_open
+  conditions: [roof_err]
+- trigger: done_opening
+  source: opening
   dest: waiting_open
   conditions: []
 
 # Acquire
 - trigger: acquire
-  source: scheduling
-  dest: acquiring
-  conditions: [ok_to_observe, have_target]
-- trigger: acquire
-  source: scheduling
-  dest: waiting_open
-  conditions: [ok_to_observe]
-- trigger: acquire
-  source: scheduling
+  source: waiting_open
   dest: closing
-  conditions: [no_targets]
+  conditions: [done_observing]
+- trigger: acquire
+  source: waiting_open
+  dest: waiting_open
+  conditions: [no_target]
+- trigger: acquire
+  source: waiting_open
+  dest: acquiring
+  conditions: []
 
 # Done Acquiring
 - trigger: done_acquiring
@@ -70,11 +60,11 @@
 - trigger: start_observation
   source: configuring
   dest: focusing
-  conditions: [focus_next, ok_to_observe]
+  conditions: [focus_next]
 - trigger: start_observation
   source: configuring
   dest: observing
-  conditions: [ok_to_observe]
+  conditions: []
 
 # Observation Complete
 - trigger: observation_complete
@@ -92,15 +82,27 @@
   dest: focusing
   conditions: [focus_failed]
 
+# Done Closing
+- trigger: done_closing
+  source: closing
+  dest: alert
+  conditions: [roof_err]
+- trigger: done_closing
+  source: closing
+  dest: pau
+  conditions: [done_observing]
+- trigger: done_closing
+  source: closing
+  dest: waiting_closed
+  conditions: []
 
-#- trigger: close
-#  source: [opening, scheduling, acquiring, configuring, observing, waiting_open]
-#  dest: closing
-#  conditions: []
+
+
 #- trigger: shutdown
 #  source: closing
 #  dest: pau
 #  conditions: []
+
 #- trigger: wait_open
 #  source: scheduling
 #  dest: waiting_open

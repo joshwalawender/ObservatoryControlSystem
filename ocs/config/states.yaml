@@ -1,71 +1,43 @@
 - name: sleeping
-  on_enter:
-  - entry_timestamp
-  on_exit:
-  - log_wakeup
-  - exit_timestamp
+  on_enter: [entry_timestamp]
+  on_exit:  [log_wakeup, exit_timestamp]
+
 - name: waiting_closed
-  on_enter:
-  - entry_timestamp
-  - wait_for
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, wait]
+  on_exit:  [exit_timestamp]
+
 - name: waiting_open
-  on_enter:
-  - entry_timestamp
-  - wait_for
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, wait]
+  on_exit:  [exit_timestamp]
+
 - name: opening
-  on_enter:
-  - entry_timestamp
-  - open_roof
-  on_exit:
-  - exit_timestamp
-- name: scheduling
-  on_enter:
-  - entry_timestamp
-  - get_OB
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, open_roof]
+  on_exit:  [exit_timestamp]
+
 - name: acquiring
-  on_enter:
-  - entry_timestamp
-  - begin_acquisition
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, begin_acquisition]
+  on_exit:  [exit_timestamp]
+
 - name: configuring
-  on_enter:
-  - entry_timestamp
-  - configure_instrument
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, configure_instrument]
+  on_exit:  [exit_timestamp]
+
 - name: focusing
-  on_enter:
-  - entry_timestamp
-  - begin_focusing
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, begin_focusing]
+  on_exit:  [exit_timestamp]
+
 - name: observing
-  on_enter:
-  - entry_timestamp
-  - begin_observation
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, begin_observation]
+  on_exit:  [exit_timestamp]
+
 - name: closing
-  on_enter:
-  - entry_timestamp
-  - close_roof
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, close_roof]
+  on_exit:  [exit_timestamp]
+
 - name: pau
-  on_enter:
-  - entry_timestamp
-  - night_summary
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp, night_summary]
+  on_exit:  [exit_timestamp]
+
 - name: alert
-  on_enter:
-  - entry_timestamp
-  on_exit:
-  - exit_timestamp
+  on_enter: [entry_timestamp]
+  on_exit:  [exit_timestamp]
