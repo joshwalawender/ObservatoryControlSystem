@@ -66,6 +66,7 @@ class RollOffRoof():
                  Telescope=None, telescope_config={},
                  Instrument=None, instrument_config={},
                  Detector=None, detector_config={},
+                 OBs=[],
                  ):
         self.name = name
         # Components
@@ -74,7 +75,7 @@ class RollOffRoof():
         self.telescope = Telescope(config=telescope_config)
         self.instrument = Instrument(config=instrument_config)
         self.detector = Detector(config=detector_config)
-        self.scheduler = Scheduler()
+        self.scheduler = Scheduler(OBs=OBs)
         # Load States File
         states_file = root_path.joinpath(states_file)
         with open(states_file.expanduser().absolute()) as FO:
@@ -103,7 +104,8 @@ class RollOffRoof():
         self.startup_at = datetime.now()
         self.entered_state_at = datetime.now()
         self.last_state = str(self.state)
-        self.executed = Table(names=('type', 'target', 'pattern', 'instconfig', 'detconfig', 'failed'),
+        self.executed = Table(names=('type', 'target', 'pattern', 'instconfig',
+                                     'detconfig', 'failed'),
                               dtype=('a20', 'a40', 'a20', 'a40', 'a40', np.bool))
         self.current_OB = None
         self.waitcount = 0
@@ -119,8 +121,9 @@ class RollOffRoof():
     ##-------------------------------------------------------------------------
     ## Record Keeping Utilities
     def log(self, msg, level=logging.INFO):
-        current_OB = f'{self.current_OB.blocktype} @ {self.current_OB.target}' if self.current_OB is not None else 'None'
-        log.log(level, f'{self.state:13s}|{current_OB:30s}: {msg}')
+        current_OB = f'{self.current_OB.blocktype} @ {self.current_OB.target}'\
+                     if self.current_OB is not None else 'None'
+        log.log(level, f'{self.state:15s}|{current_OB:30s}: {msg}')
 
 
     def entry_timestamp(self):
@@ -131,7 +134,8 @@ class RollOffRoof():
     def exit_timestamp(self):
         self.last_state = str(self.state)
         duration = (datetime.now() - self.entered_state_at).total_seconds()
-        self.log(f'Exiting state {self.state} after {duration:.1f}s', level=logging.DEBUG)
+        self.log(f'Exiting state {self.state} after {duration:.1f}s',
+                 level=logging.DEBUG)
         if self.state in self.durations.keys():
             self.durations[self.state] += duration
         else:
@@ -240,7 +244,7 @@ class RollOffRoof():
         too_many_errors = self.error_count > self.max_allowed_errors
         if too_many_errors is True:
             self.log(f'Error count for tonight exceeded', level=logging.ERROR)
-            self.we_are_done = True
+            self.begin_end_of_night_shutdown()
         done_string = {True: '', False: 'not '}[self.we_are_done]
         self.log(f'We are {done_string}shutting down', level=logging.DEBUG)
         return self.we_are_done
@@ -302,9 +306,10 @@ class RollOffRoof():
     ## On Entry Tasks for States
     def wait(self):
         if self.last_state == self.state:
+            sleep(self.waittime)
             self.waitcount += 1
-            self.log('Incrementing wait count to {self.waitcount}', level=logging.WARNING)
-        sleep(self.waittime)
+            self.log(f'Incrementing wait count to {self.waitcount}',
+                     level=logging.WARNING)
         if self.waitcount > self.maxwaits:
             self.log('Wait count exceeded', level=logging.ERROR)
             self.begin_end_of_night_shutdown()
@@ -321,38 +326,15 @@ class RollOffRoof():
             self.acquire()
 
 
-    def old_wait(self):
-        self.waitcount += 1
-        sleep(1)
-        if self.waitcount > self.maxwaits:
-            self.log('Wait count exceeded')
-            self.begin_end_of_night_shutdown()
-            self.close()
-        elif self.we_are_done is True:
-            self.log('We are done')
-            self.begin_end_of_night_shutdown()
-            self.close()
-        elif self.error_count > self.max_allowed_errors:
-            self.log('Too may errors')
-            self.begin_end_of_night_shutdown()
-            self.close()
-        else:
-            self.log(f'waiting {self.waittime}s (roof is open? {self.roof.is_open}, waitcount = {self.waitcount})')
-            sleep(self.waittime)
-            if self.roof.is_open == True:
-                self.select_OB()
-            else:
-                self.open_roof()
-
-
     def open_roof(self):
         self.log('Opening the roof')
         try:
             self.roof.open()
-        except RoofFailure as err:
+        except RoofFailure as err: 
             self.log('Problem opening roof!', level=logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
+            self.begin_end_of_night_shutdown()
         self.done_opening()
 
 
@@ -360,7 +342,7 @@ class RollOffRoof():
         self.log('Closing the roof')
         try:
             self.roof.close()
-        except RoofFailure:
+        except RoofFailure as err:
             self.log('Roof failure on closing', logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
@@ -437,13 +419,15 @@ class RollOffRoof():
             take_focus_data = getattr(self.current_OB, "take_focus_data", None)
             if callable(take_focus_data) is True:
                 self.log(f'Taking focus data for {self.current_OB.blocktype}')
-                take_data_failed = not take_focus_data(self.instrument, self.detector)
+                take_data_failed = not take_focus_data(self.instrument,
+                                                       self.detector)
             analyze_focus_data = getattr(self.current_OB, "analyze_focus_data", None)
             if callable(analyze_focus_data) is True:
                 self.log(f'Analyzing focus data for {self.current_OB.blocktype}')
                 analyze_data_failed = not analyze_focus_data(self.instrument)
         else:
-            self.log(f'Focus strategy {self.current_OB} is unknown', level=logging.ERROR)
+            self.log(f'Focus strategy {self.current_OB} is unknown',
+                     level=logging.ERROR)
         self.record_OB(failed=(take_data_failed or analyze_data_failed))
         self.focusing_complete()
 
