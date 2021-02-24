@@ -27,6 +27,55 @@ log.addHandler(LogFileHandler)
 log.info('\n\n******** Beginning Tests ********\n')
 
 
+##-------------------------------------------------------------------------
+## Build some test OBs
+##-------------------------------------------------------------------------
+from ocs.focusing import FocusFitParabola
+from ocs.instruments.SVQ100_ZWO import SVQ100_ZWO, CMOSCameraConfig
+from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
+from odl.target import Target, TargetList
+from odl.offset import Stare
+from odl.alignment import BlindAlign, MaskAlign
+
+M42 = Target('M42')
+M78 = Target('M78')
+blindalign = BlindAlign()
+stare = Stare()
+filter_L = SVQ100_ZWO(filter='L')
+filter_R = SVQ100_ZWO(filter='R')
+filter_G = SVQ100_ZWO(filter='G')
+filter_B = SVQ100_ZWO(filter='B')
+exp300_x12 = CMOSCameraConfig(exptime=300, nexp=12)
+exp10 = CMOSCameraConfig(exptime=10, nexp=1)
+OBs = [FocusFitParabola(target=M42, align=blindalign, pattern=stare,
+                        instconfig=filter_L, detconfig=exp10,
+                        n_focus_positions=7, focus_step=50),
+       ScienceBlock(target=M42, align=blindalign, pattern=stare,
+                    instconfig=filter_L, detconfig=exp300_x12),
+       ScienceBlock(target=M42, align=blindalign, pattern=stare,
+                    instconfig=filter_R, detconfig=exp300_x12),
+       ScienceBlock(target=M42, align=blindalign, pattern=stare,
+                    instconfig=filter_G, detconfig=exp300_x12),
+       ScienceBlock(target=M42, align=blindalign, pattern=stare,
+                    instconfig=filter_B, detconfig=exp300_x12),
+       FocusFitParabola(target=M78, align=blindalign, pattern=stare,
+                        instconfig=filter_L, detconfig=exp10,
+                        n_focus_positions=7, focus_step=50),
+       ScienceBlock(target=M78, align=blindalign, pattern=stare,
+                    instconfig=filter_L, detconfig=exp300_x12),
+       ScienceBlock(target=M78, align=blindalign, pattern=stare,
+                    instconfig=filter_R, detconfig=exp300_x12),
+       ScienceBlock(target=M78, align=blindalign, pattern=stare,
+                    instconfig=filter_G, detconfig=exp300_x12),
+       ScienceBlock(target=M78, align=blindalign, pattern=stare,
+                    instconfig=filter_B, detconfig=exp300_x12),
+       ]
+OBs = ObservingBlockList(OBs)
+
+
+##-------------------------------------------------------------------------
+## Read Configuration
+##-------------------------------------------------------------------------
 root_path = Path(__file__).parent.joinpath('ocs/config')
 with open(root_path / 'config.yaml') as config_file:
     config = yaml.safe_load(config_file)
@@ -60,7 +109,7 @@ config['detector_config'] = simulator_config
 
 
 def test_roof_close_failure():
-    obs = RollOffRoof(**config)
+    obs = RollOffRoof(OBs=OBs, **config)
     obs.wake_up()
     assert obs.state == 'alert'
     assert obs.we_are_done is True
@@ -70,7 +119,7 @@ def test_roof_close_failure():
 def test_roof_close_failure_with_other_failures():
     simulator_config['slew_fail_after'] = 2
     config['telescope_config'] = simulator_config
-    obs = RollOffRoof(**config)
+    obs = RollOffRoof(OBs=OBs, **config)
     obs.wake_up()
     assert obs.state == 'alert'
     assert obs.we_are_done is True
