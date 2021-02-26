@@ -97,15 +97,11 @@ class RollOffRoof():
                  telescope=None, telescope_config={},
                  instrument=None, instrument_config={},
                  detector=None, detector_config={},
-                 file_basename='img', file_startno=1, file_ndigits=4,
-                 file_outdir='~',
+                 datadir='~',
                  OBs=[],
                  ):
         self.name = name
-        self.file_basename = file_basename
-        self.file_num = file_startno
-        self.file_ndigits = file_ndigits
-        self.file_outdir = Path(file_outdir).expanduser()
+        self.datadir = Path(datadir).expanduser()
         # Components
         self.weather = weather(logger=log, **weather_config)
         self.roof = roof(logger=log, **roof_config)
@@ -471,9 +467,10 @@ class RollOffRoof():
         self.focusing_complete()
 
 
-    def build_fits_flename(self):
-        fits_file = f'{self.file_basename}{self.file_num:04d}.fits'
-        self.file_num += 1
+    def build_fits_filename(self, camera='cam'):
+        date_time_string = datetime.utcnow().strftime(f'%Y%m%d_at_%H%M%S')
+        fits_filename = f"{camera}_{date_time_string}UT.fits"
+        fits_file = self.datadir.joinpath(fits_filename)
         return fits_file
 
 
@@ -503,10 +500,10 @@ class RollOffRoof():
                     self.error_count += 1
                 else:
                     dataok.append(True)
-                fits_filename = self.build_fits_flename()
-                fits_file = self.file_outdir.joinpath(fits_filename)
-                self.log(f'  Writing {fits_file}')
-                hdul.writeto(fits_file, overwrite=True)
+                if hdul is not None:
+                    fits_file = self.build_fits_filename(camera=f'cam{self.detector.device_number}')
+                    self.log(f'  Writing {fits_file.name}')
+                    hdul.writeto(fits_file, overwrite=False)
         # return to offset 0, 0
         allok = np.all(dataok)
         self.record_OB(failed=not allok)

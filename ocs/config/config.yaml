@@ -6,11 +6,7 @@ initial_state: sleeping
 max_allowed_errors: 1
 waittime: 2
 maxwait: 10
-
-# filename
-file_basename: img
-file_startno: 0
-file_ndigits: 4
+datadir: ~/OCSdata/
 
 weather: simulator
 roof: simulator
