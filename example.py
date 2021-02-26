@@ -31,30 +31,30 @@ filter_L = inst_config(filter='L')
 filter_R = inst_config(filter='R')
 filter_G = inst_config(filter='G')
 filter_B = inst_config(filter='B')
-exp300_x12 = detector_config(exptime=300, nexp=12)
-exp10 = detector_config(exptime=10, nexp=1)
+science_exp = detector_config(exptime=10, nexp=3)
+focus_exp = detector_config(exptime=5, nexp=1)
 OBs = [FocusFitParabola(target=M42, align=blindalign, pattern=stare,
-                        instconfig=filter_L, detconfig=exp10,
+                        instconfig=filter_L, detconfig=focus_exp,
                         n_focus_positions=7, focus_step=50),
        ScienceBlock(target=M42, align=blindalign, pattern=stare,
-                    instconfig=filter_L, detconfig=exp300_x12),
+                    instconfig=filter_L, detconfig=science_exp),
        ScienceBlock(target=M42, align=blindalign, pattern=stare,
-                    instconfig=filter_R, detconfig=exp300_x12),
+                    instconfig=filter_R, detconfig=science_exp),
 #        ScienceBlock(target=M42, align=blindalign, pattern=stare,
-#                     instconfig=filter_G, detconfig=exp300_x12),
+#                     instconfig=filter_G, detconfig=science_exp),
 #        ScienceBlock(target=M42, align=blindalign, pattern=stare,
-#                     instconfig=filter_B, detconfig=exp300_x12),
+#                     instconfig=filter_B, detconfig=science_exp),
 #        FocusFitParabola(target=M78, align=blindalign, pattern=stare,
-#                         instconfig=filter_L, detconfig=exp10,
+#                         instconfig=filter_L, detconfig=focus_exp,
 #                         n_focus_positions=7, focus_step=50),
 #        ScienceBlock(target=M78, align=blindalign, pattern=stare,
-#                     instconfig=filter_L, detconfig=exp300_x12),
+#                     instconfig=filter_L, detconfig=science_exp),
 #        ScienceBlock(target=M78, align=blindalign, pattern=stare,
-#                     instconfig=filter_R, detconfig=exp300_x12),
+#                     instconfig=filter_R, detconfig=science_exp),
 #        ScienceBlock(target=M78, align=blindalign, pattern=stare,
-#                     instconfig=filter_G, detconfig=exp300_x12),
+#                     instconfig=filter_G, detconfig=science_exp),
 #        ScienceBlock(target=M78, align=blindalign, pattern=stare,
-#                     instconfig=filter_B, detconfig=exp300_x12),
+#                     instconfig=filter_B, detconfig=science_exp),
        ]
 OBs = ObservingBlockList(OBs)
 

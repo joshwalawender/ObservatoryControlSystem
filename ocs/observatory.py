@@ -114,9 +114,15 @@ class RollOffRoof():
                  telescope=None, telescope_config={},
                  instrument=None, instrument_config={},
                  detector=None, detector_config={},
+                 file_basename='img', file_startno=1, file_ndigits=4,
+                 file_outdir='~',
                  OBs=[],
                  ):
         self.name = name
+        self.file_basename = file_basename
+        self.file_num = file_startno
+        self.file_ndigits = file_ndigits
+        self.file_outdir = Path(file_outdir).expanduser()
         # Components
         self.weather = weather(config=weather_config)
         self.roof = roof(config=roof_config)
@@ -485,28 +491,44 @@ class RollOffRoof():
         self.focusing_complete()
 
 
+    def build_fits_flename(self):
+        fits_file = f'{self.file_basename}{self.file_num:04d}.fits'
+        self.file_num += 1
+        return fits_file
+
+
     def begin_observation(self):
-        if self.current_OB is not None:
-            self.log('starting observation')
-            # set detector parameters
-            # for position in OffsetPattern
-            # - offset to position
-            # - take data
-            # return to offset 0, 0
-
-
-
-
-            try:
-                self.detector.expose(self.current_OB.detconfig)
-            except DetectorFailure:
-                self.log('Detector failure', level=logging.ERROR)
-                self.error_count += 1
-            else:
-    #             ok = self.check_ok()
-                ok = True
-                self.record_OB(failed=not ok)
-        else:
-            self.log('No OB to observe', level=logging.DEBUG)
+        # set detector parameters
+        # For now we assume only one detconfig
+        dc = self.current_OB.detconfig[0]
+        self.log(f'Starting observation: {self.current_OB.pattern}: {dc}')
+        self.detector.set_exptime(dc.exptime)
+        if dc.gain is not None:
+            self.detector.set_gain(dc.gain)
+        if dc.binning is not None:
+            binx, biny = dc.binning.split('x')
+            self.detector.set_binning(int(binx), int(biny))
+        if dc.window is not None:
+            self.detector.set_window(dc.window)
+        dataok = []
+        for position in self.current_OB.pattern:
+            # Offset to position
+            # Take Data
+            for i in range(dc.nexp):
+                self.log(f'  Starting {dc.exptime:.0f}s exposure ({i+1} of {dc.nexp})')
+                try:
+                    hdul = self.detector.expose()
+                except DetectorFailure:
+                    self.log('Detector failure', level=logging.ERROR)
+                    self.error_count += 1
+                else:
+                    dataok.append(True)
+                fits_filename = self.build_fits_flename()
+                fits_file = self.file_outdir.joinpath(fits_filename)
+                self.log(f'  Writing {fits_file}')
+#                 hdul.write(fits_file)
+        # return to offset 0, 0
+        allok = np.all(dataok)
+        self.record_OB(failed=not allok)
         self.observation_complete()
 
