@@ -2,8 +2,9 @@ from odl.detector_config import VisibleDetectorConfig
 from odl.instrument_config import InstrumentConfig
 from odl.block import FocusBlock
 
-import pypaca
-
+# Use pypaca Camera as detector controller
+from pypaca.devices.camera import Camera as DetectorController
+from pypaca.devices import focuser, filterwheel
 
 ##-------------------------------------------------------------------------
 ## CMOSCameraConfig
@@ -34,38 +35,18 @@ class InstrumentConfig(InstrumentConfig):
         self.focuspos = focuspos
 
 
-    def biases(self):
-        '''
-        '''
-        ic_for_bias = deepcopy(self)
-        ic_for_bias.name += f' bias'
-        dc_for_bias = CMOSCameraConfig(exptime=0)
-        biases = CalibrationBlock(target=None,
-                                  pattern=Stare(repeat=15),
-                                  instconfig=ic_for_bias,
-                                  detconfig=dc_for_bias,
-                                  )
-        return biases
-
-
-    def cals(self):
-        '''
-        '''
-        cals = ObservingBlockList()
-        cals.append(self.biases())
-#         cals.append(self.domeflats())
-        return cals
-
-
 ##-------------------------------------------------------------------------
 ## SVQ100_ZWO Instrument Controller
 ##-------------------------------------------------------------------------
-class SVQ100_ZWOController():
+class InstrumentController():
     def __init__(self):
-        self.filterwheel = pypaca.filterwheel.FilterWheel()
+        self.filterwheel = filterwheel.FilterWheel()
+        self.focuser = focuser.Focuser()
+        config_file = Path(__file__).parent
+        print(config_file)
 
 
-class SVQ100_ZWODetectorController():
-    def __init__(self):
+    def configure(self, ic):
+        '''Set hardware in a state described by the input InstrumentConfig
+        '''
         pass
-
