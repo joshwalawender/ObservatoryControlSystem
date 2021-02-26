@@ -2,6 +2,7 @@ from pathlib import Path
 import yaml
 from datetime import datetime
 import importlib
+from copy import deepcopy
 
 from ocs.observatory import RollOffRoof, load_configuration
 
@@ -80,6 +81,7 @@ OBs = ObservingBlockList(OBs)
 ##-------------------------------------------------------------------------
 config = load_configuration()
 config['waittime'] = 0
+config['maxwait'] = 0.1
 config['weather_config'] = {}
 config['roof_config'] = {'roof_time_to_open': 0,
                          'roof_time_to_close': 0,
@@ -109,10 +111,9 @@ config['detector_config'] = {'exposure_overhead': 0,
 import pytest
 @pytest.mark.parametrize("test_input,expected", [(None, None)]*100)
 def test_random_failures(test_input, expected):
-    obs = RollOffRoof(OBs=OBs, **config)
+    obs = RollOffRoof(OBs=deepcopy(OBs), **config)
     obs.wake_up()
     assert obs.state in ['pau', 'alert']
-    assert obs.we_are_done == True
     assert obs.error_count <= config['max_allowed_errors']+1
 
 

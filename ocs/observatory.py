@@ -108,7 +108,7 @@ class RollOffRoof():
                  transitions_file='transitions.yaml',
                  location_file = 'location.yaml',
                  initial_state='sleeping',
-                 waittime=2, maxwaits=4, max_allowed_errors=0,
+                 waittime=2, maxwait=10, max_allowed_errors=0,
                  weather=None, weather_config={},
                  roof=None, roof_config={},
                  telescope=None, telescope_config={},
@@ -138,7 +138,8 @@ class RollOffRoof():
             self.location_info = yaml.safe_load(FO)
         self.location = c.EarthLocation(**self.location_info)
         self.waittime = waittime
-        self.maxwaits = maxwaits
+        self.maxwait = maxwait
+        self.wait_duration = 0
         self.max_allowed_errors = max_allowed_errors
         self.machine = Machine(model=self,
                                states=self.states,
@@ -156,7 +157,6 @@ class RollOffRoof():
                                      'detconfig', 'failed'),
                               dtype=('a20', 'a40', 'a20', 'a40', 'a40', np.bool))
         self.current_OB = None
-        self.waitcount = 0
         self.we_are_done = False
         self.durations = {}
         self.errors = []
@@ -175,8 +175,12 @@ class RollOffRoof():
 
 
     def entry_timestamp(self):
-        self.log(f'Entering state: {self.state} (from {self.last_state})')
-        self.entered_state_at = datetime.now()
+        if str(self.state) != str(self.last_state):
+            self.log(f'Entering state: {self.state} (from {self.last_state})')
+            self.log('Resetting entry time', level=logging.DEBUG)
+            self.entered_state_at = datetime.now()
+        if str(self.state) == 'acquiring':
+            self.wait_duration = 0
 
 
     def exit_timestamp(self):
@@ -232,10 +236,6 @@ class RollOffRoof():
         self.current_OB = None
 
 
-    def reset_waitcount(self):
-        self.waitcount = 0
-
-
     def begin_end_of_night_shutdown(self):
         self.we_are_done = True
 
@@ -276,15 +276,16 @@ class RollOffRoof():
 
 
     def is_dark(self):
-        self.log('Checking dark', level=logging.DEBUG)
         obstime = Time.now()
-        sun = c.get_sun(time=obstime)
-        altaz = c.AltAz(location=self.location, obstime=obstime,
-#                         pressure=, temperature=, relative_humidity=,
-                        obswl=0.5*u.micron)
-        sun_is_down = sun.transform_to(altaz).alt < 0
-        self.log(f'Sun is Down? {sun_is_down}', level=logging.DEBUG)
-        sun_is_down = True
+#         sun = c.get_sun(time=obstime)
+#         altaz = c.AltAz(location=self.location, obstime=obstime,
+#                         obswl=0.5*u.micron)
+#         sun_is_down = sun.transform_to(altaz).alt < 0
+#         self.log(f'Sun is Down? {sun_is_down}', level=logging.DEBUG)
+        # Replace this with a simple timer which has sunrise after a set time
+        uptime = (datetime.now() - self.startup_at).total_seconds()
+        sun_is_down = uptime < self.maxwait*3
+        self.log(f'Is it dark? {sun_is_down}', level=logging.DEBUG)
         return sun_is_down
 
 
@@ -294,12 +295,22 @@ class RollOffRoof():
             self.log(f'Error count for tonight exceeded', level=logging.ERROR)
             self.begin_end_of_night_shutdown()
         done_string = {True: '', False: 'not '}[self.we_are_done]
+
+        if self.state == 'waiting_closed' and not self.is_dark():
+            self.begin_end_of_night_shutdown()
+
         self.log(f'We are {done_string}shutting down', level=logging.DEBUG)
         return self.we_are_done
 
 
+    def long_wait(self):
+        return (self.wait_duration > self.maxwait)
+
+
     def not_done_observing(self):
-        return not self.done_observing()
+        done = self.done_observing()
+        self.log(f'Done observing? {done}')
+        return not done
 
 
     def no_target(self):
@@ -318,7 +329,10 @@ class RollOffRoof():
         - it is night
         - we're not shutting down for other reasons
         '''
-        return self.is_safe() and self.is_dark() and self.not_done_observing()
+        ready_to_open = self.is_safe() and self.is_dark()\
+                        and self.not_done_observing()\
+                        and self.current_OB is not None
+        return ready_to_open
 
 
     def acquisition_failed(self):
@@ -345,6 +359,7 @@ class RollOffRoof():
     def get_OB(self):
         try:
             self.current_OB = self.scheduler.select()
+            self.log(f'Got OB: {self.current_OB}')
         except SchedulingFailure as err:
             self.log(f'Scheduling error: {err}', level=logging.ERROR)
             self.software_errors.append(err)
@@ -353,16 +368,12 @@ class RollOffRoof():
     ##-------------------------------------------------------------------------
     ## On Entry Tasks for States
     def wait(self):
-        if self.last_state == self.state:
+        sleep(0.0006)
+        self.wait_duration = (datetime.now() - self.entered_state_at).total_seconds()
+        if self.wait_duration > 0.001:
+            self.log(f'Waiting {self.waittime} s')
             sleep(self.waittime)
-            self.waitcount += 1
-            self.log(f'Incrementing wait count to {self.waitcount}',
-                     level=logging.WARNING)
-        if self.waitcount > self.maxwaits:
-            self.log('Wait count exceeded', level=logging.ERROR)
-            self.begin_end_of_night_shutdown()
-            self.acquire()
-        elif self.state == 'waiting_closed':
+        if self.state == 'waiting_closed':
             self.get_OB()
             self.done_waiting()
         elif self.state == 'waiting_open':

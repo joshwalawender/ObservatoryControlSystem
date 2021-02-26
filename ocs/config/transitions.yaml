@@ -39,6 +39,10 @@
   conditions: [done_observing]
 - trigger: acquire
   source: waiting_open
+  dest: closing
+  conditions: [long_wait]
+- trigger: acquire
+  source: waiting_open
   dest: waiting_open
   conditions: [no_target]
 - trigger: acquire

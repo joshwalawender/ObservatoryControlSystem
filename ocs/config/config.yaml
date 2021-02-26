@@ -5,7 +5,7 @@ transitions_file: transitions.yaml
 initial_state: sleeping
 max_allowed_errors: 1
 waittime: 2
-maxwaits: 4
+maxwait: 10
 
 weather: simulator
 roof: simulator
