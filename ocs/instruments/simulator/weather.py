@@ -9,7 +9,7 @@ from ocs.exceptions import *
 
 
 class Weather():
-    def __init__(self, config={}):
+    def __init__(self):
         self.safety_file = Path('~/.safe.txt').expanduser()
 
 

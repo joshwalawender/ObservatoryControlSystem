@@ -16,4 +16,4 @@ weather: simulator
 roof: simulator
 telescope: simulator
 instrument: simulator
-detector: simulator
+detector: SVQ100_ZWO

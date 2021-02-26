@@ -1,0 +1,4 @@
+exposure_overhead: 1
+expose_fail_after: null
+expose_random_fail_rate: 0
+simulate_exposure_time: True

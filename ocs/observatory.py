@@ -64,35 +64,18 @@ def load_configuration(config_file=None):
         config = yaml.safe_load(FO)
 
     # Instantiate devices
-    weather_module = importlib.import_module(f"ocs.instruments.{config['weather']}")
-    weather_config_file = root_path/'instruments'/f"{config['weather']}"/'config.yaml'
-    with open(weather_config_file) as FO:
-        config['weather_config'] = yaml.safe_load(FO)
-    config['weather'] = getattr(weather_module, f"Weather")
-
-    roof_module = importlib.import_module(f"ocs.instruments.{config['roof']}")
-    roof_config_file = root_path/'instruments'/f"{config['roof']}"/'config.yaml'
-    with open(roof_config_file) as FO:
-        config['roof_config'] = yaml.safe_load(FO)
-    config['roof'] = getattr(roof_module, f"Roof")
-
-    telescope_module = importlib.import_module(f"ocs.instruments.{config['telescope']}")
-    telescope_config_file = root_path/'instruments'/f"{config['telescope']}"/'config.yaml'
-    with open(telescope_config_file) as FO:
-        config['telescope_config'] = yaml.safe_load(FO)
-    config['telescope'] = getattr(telescope_module, f"Telescope")
-
-    instr_module = importlib.import_module(f"ocs.instruments.{config['instrument']}")
-    instr_config_file = root_path/'instruments'/f"{config['instrument']}"/'config.yaml'
-    with open(instr_config_file) as FO:
-        config['instrument_config'] = yaml.safe_load(FO)
-    config['instrument'] = getattr(instr_module, f"InstrumentController")
-
-    detector_module = importlib.import_module(f"ocs.instruments.{config['detector']}")
-    detector_config_file = root_path/'instruments'/f"{config['detector']}"/'config.yaml'
-    with open(detector_config_file) as FO:
-        config['detector_config'] = yaml.safe_load(FO)
-    config['detector'] = getattr(detector_module, f"DetectorController")
+    devices_path = root_path/'instruments'
+    for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
+        module = importlib.import_module(f"ocs.instruments.{config[component]}")
+        device_config_file = devices_path/f"{config[component]}"/f'{component}_config.yaml'
+        with open(device_config_file) as FO:
+            config[f'{component}_config'] = yaml.safe_load(FO)
+        if config[f'{component}_config'] is None:
+            config[f'{component}_config'] = {}
+        instancename = component.capitalize()
+        if component in ['instrument', 'detector']:
+            instancename += 'Controller'
+        config[component] = getattr(module, instancename)
 
     return config
 
@@ -124,11 +107,17 @@ class RollOffRoof():
         self.file_ndigits = file_ndigits
         self.file_outdir = Path(file_outdir).expanduser()
         # Components
-        self.weather = weather(config=weather_config)
-        self.roof = roof(config=roof_config)
-        self.telescope = telescope(config=telescope_config)
-        self.instrument = instrument(config=instrument_config)
-        self.detector = detector(config=detector_config)
+        self.weather = weather(**weather_config)
+        self.roof = roof(**roof_config)
+        self.telescope = telescope(**telescope_config)
+        self.instrument = instrument(**instrument_config)
+        self.detector = detector(**detector_config)
+
+#         if detector_config in [{}, None]:
+#             self.detector = detector()
+#         else:
+#             self.detector = detector(config=detector_config)
+
         self.scheduler = Scheduler(OBs=OBs)
         # Load States File
         states_file = root_path.joinpath(states_file)
@@ -214,18 +203,18 @@ class RollOffRoof():
         self.log('Location Info', logging.DEBUG)
         for key in self.location_info.keys():
             self.log(f'  {key}: {self.location_info.get(key)}', logging.DEBUG)
-        self.log(f'Roof parameters:', logging.DEBUG)
-        for key in self.roof.config.keys():
-            self.log(f'  {key}: {self.roof.config.get(key)}', logging.DEBUG)
-        self.log(f'Telescope parameters:', logging.DEBUG)
-        for key in self.telescope.config.keys():
-            self.log(f'  {key}: {self.telescope.config.get(key)}', logging.DEBUG)
-        self.log(f'Instrument parameters:', logging.DEBUG)
-        for key in self.instrument.config.keys():
-            self.log(f'  {key}: {self.instrument.config.get(key)}', logging.DEBUG)
-        self.log(f'Detector parameters:', logging.DEBUG)
-        for key in self.detector.config.keys():
-            self.log(f'  {key}: {self.detector.config.get(key)}', logging.DEBUG)
+#         self.log(f'Roof parameters:', logging.DEBUG)
+#         for key in self.roof_config.keys():
+#             self.log(f'  {key}: {self.roof.config.get(key)}', logging.DEBUG)
+#         self.log(f'Telescope parameters:', logging.DEBUG)
+#         for key in self.telescope_config.keys():
+#             self.log(f'  {key}: {self.telescope.config.get(key)}', logging.DEBUG)
+#         self.log(f'Instrument parameters:', logging.DEBUG)
+#         for key in self.instrument_config.keys():
+#             self.log(f'  {key}: {self.instrument.config.get(key)}', logging.DEBUG)
+#         self.log(f'Detector parameters:', logging.DEBUG)
+#         for key in self.detector_config.keys():
+#             self.log(f'  {key}: {self.detector.config.get(key)}', logging.DEBUG)
 
 
     def record_OB(self, failed=False):
@@ -526,7 +515,7 @@ class RollOffRoof():
                 fits_filename = self.build_fits_flename()
                 fits_file = self.file_outdir.joinpath(fits_filename)
                 self.log(f'  Writing {fits_file}')
-#                 hdul.write(fits_file)
+                hdul.writeto(fits_file, overwrite=True)
         # return to offset 0, 0
         allok = np.all(dataok)
         self.record_OB(failed=not allok)
