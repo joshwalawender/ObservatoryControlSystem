@@ -1,10 +1,10 @@
 #!python3
 from time import sleep
 
-from ..exceptions import *
+from ocs.exceptions import *
 
 
-class Instrument():
+class InstrumentController():
     def __init__(self, config={}):
         self.config = config
         self.name = 'simulator'

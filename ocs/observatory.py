@@ -1,5 +1,6 @@
 #!python3
 from pathlib import Path
+import importlib
 from time import sleep
 from datetime import datetime
 import random
@@ -50,6 +51,53 @@ log.addHandler(LogConsoleHandler)
 
 
 ##-------------------------------------------------------------------------
+## Read Configuration
+##-------------------------------------------------------------------------
+def load_configuration(config_file=None):
+    root_path = Path(__file__).parent
+    if config_file is None:
+        config_file = root_path.joinpath('config/config.yaml')
+    if config_file.exists() is False:
+        print('No config file found')
+        sys.exit(0)
+    with open(config_file) as FO:
+        config = yaml.safe_load(FO)
+
+    # Instantiate devices
+    weather_module = importlib.import_module(f"ocs.instruments.{config['weather']}")
+    weather_config_file = root_path/'instruments'/f"{config['weather']}"/'config.yaml'
+    with open(weather_config_file) as FO:
+        config['weather_config'] = yaml.safe_load(FO)
+    config['weather'] = getattr(weather_module, f"Weather")
+
+    roof_module = importlib.import_module(f"ocs.instruments.{config['roof']}")
+    roof_config_file = root_path/'instruments'/f"{config['roof']}"/'config.yaml'
+    with open(roof_config_file) as FO:
+        config['roof_config'] = yaml.safe_load(FO)
+    config['roof'] = getattr(roof_module, f"Roof")
+
+    telescope_module = importlib.import_module(f"ocs.instruments.{config['telescope']}")
+    telescope_config_file = root_path/'instruments'/f"{config['telescope']}"/'config.yaml'
+    with open(telescope_config_file) as FO:
+        config['telescope_config'] = yaml.safe_load(FO)
+    config['telescope'] = getattr(telescope_module, f"Telescope")
+
+    instr_module = importlib.import_module(f"ocs.instruments.{config['instrument']}")
+    instr_config_file = root_path/'instruments'/f"{config['instrument']}"/'config.yaml'
+    with open(instr_config_file) as FO:
+        config['instrument_config'] = yaml.safe_load(FO)
+    config['instrument'] = getattr(instr_module, f"InstrumentController")
+
+    detector_module = importlib.import_module(f"ocs.instruments.{config['detector']}")
+    detector_config_file = root_path/'instruments'/f"{config['detector']}"/'config.yaml'
+    with open(detector_config_file) as FO:
+        config['detector_config'] = yaml.safe_load(FO)
+    config['detector'] = getattr(detector_module, f"DetectorController")
+
+    return config
+
+
+##-------------------------------------------------------------------------
 ## Define Roll Off Roof Observatory Model
 ##-------------------------------------------------------------------------
 class RollOffRoof():
@@ -61,20 +109,20 @@ class RollOffRoof():
                  location_file = 'location.yaml',
                  initial_state='sleeping',
                  waittime=2, maxwaits=4, max_allowed_errors=0,
-                 Weather=None, weather_config={},
-                 Roof=None, roof_config={},
-                 Telescope=None, telescope_config={},
-                 Instrument=None, instrument_config={},
-                 Detector=None, detector_config={},
+                 weather=None, weather_config={},
+                 roof=None, roof_config={},
+                 telescope=None, telescope_config={},
+                 instrument=None, instrument_config={},
+                 detector=None, detector_config={},
                  OBs=[],
                  ):
         self.name = name
         # Components
-        self.weather = Weather(config=weather_config)
-        self.roof = Roof(config=roof_config)
-        self.telescope = Telescope(config=telescope_config)
-        self.instrument = Instrument(config=instrument_config)
-        self.detector = Detector(config=detector_config)
+        self.weather = weather(config=weather_config)
+        self.roof = roof(config=roof_config)
+        self.telescope = telescope(config=telescope_config)
+        self.instrument = instrument(config=instrument_config)
+        self.detector = detector(config=detector_config)
         self.scheduler = Scheduler(OBs=OBs)
         # Load States File
         states_file = root_path.joinpath(states_file)
@@ -378,23 +426,17 @@ class RollOffRoof():
 
 
     def park_telescope(self):
-        # If we are already parking or already shutdown, do nothing
-        if self.state == 'parking':
-            return
-        elif self.state == 'shutdown':
-            return
-
         # Otherwise, park the telescope
         self.log(f'Parking Telescope')
         try:
             self.telescope.park()
-        except:
+        except TelescopeFailure as err:
             self.log('Telescope parking failed', level=logging.ERROR)
-            self.critical_failure()
+            self.errors.append(err)
+            self.error_count += 1
         else:
             self.log('Telescope parked')
             self.current_target = None
-            self.done_parking()
 
 
     def configure_instrument(self):

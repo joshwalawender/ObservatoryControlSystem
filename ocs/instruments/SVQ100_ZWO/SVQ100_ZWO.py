@@ -2,11 +2,13 @@ from odl.detector_config import VisibleDetectorConfig
 from odl.instrument_config import InstrumentConfig
 from odl.block import FocusBlock
 
+import pypaca
+
 
 ##-------------------------------------------------------------------------
 ## CMOSCameraConfig
 ##-------------------------------------------------------------------------
-class CMOSCameraConfig(VisibleDetectorConfig):
+class DetectorConfig(VisibleDetectorConfig):
     '''An object to hold information about CMOS detector configuration.
     '''
     def __init__(self, name=None, exptime=None, nexp=1, readoutmode=0,
@@ -19,14 +21,17 @@ class CMOSCameraConfig(VisibleDetectorConfig):
 
 
 ##-------------------------------------------------------------------------
-## SVQ100_ZWO
+## SVQ100_ZWO InstrumentConfig
 ##-------------------------------------------------------------------------
-class SVQ100_ZWO(InstrumentConfig):
-    '''An object to hold information about a filter wheel configuration.
+class InstrumentConfig(InstrumentConfig):
+    '''InstrumentConfig object for a setup comprised of:
+    - ZWO Filter Wheel
+    - Optec Focuser
     '''
-    def __init__(self, filter='L'):
+    def __init__(self, filter='L', focuspos=None):
         self.name = f'{filter} Filter'
         self.filter = filter
+        self.focuspos = focuspos
 
 
     def biases(self):
@@ -50,3 +55,17 @@ class SVQ100_ZWO(InstrumentConfig):
         cals.append(self.biases())
 #         cals.append(self.domeflats())
         return cals
+
+
+##-------------------------------------------------------------------------
+## SVQ100_ZWO Instrument Controller
+##-------------------------------------------------------------------------
+class SVQ100_ZWOController():
+    def __init__(self):
+        self.filterwheel = pypaca.filterwheel.FilterWheel()
+
+
+class SVQ100_ZWODetectorController():
+    def __init__(self):
+        pass
+

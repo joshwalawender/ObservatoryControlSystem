@@ -1,18 +1,16 @@
 from pathlib import Path
 import yaml
 from datetime import datetime
+import importlib
+
+from ocs.observatory import RollOffRoof, load_configuration
+
 
 safety_file = Path('~/.safe.txt').expanduser()
 now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 with open(safety_file, 'a') as FO:
     FO.write(f'{now} safe\n')
 
-from ocs.observatory import RollOffRoof
-from ocs.simulators.weather import Weather
-from ocs.simulators.roof import Roof
-from ocs.simulators.telescope import Telescope
-from ocs.simulators.instrument import Instrument
-from ocs.simulators.detector import Detector
 
 ## Set up file output for log
 import logging
@@ -31,22 +29,26 @@ log.info('\n\n******** Beginning Tests ********\n')
 ## Build some test OBs
 ##-------------------------------------------------------------------------
 from ocs.focusing import FocusFitParabola
-from ocs.instruments.SVQ100_ZWO import SVQ100_ZWO, CMOSCameraConfig
 from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
 from odl.target import Target, TargetList
 from odl.offset import Stare
 from odl.alignment import BlindAlign, MaskAlign
 
+instr_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
+detector_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
+inst_config = getattr(instr_module, f"InstrumentConfig")
+detector_config = getattr(detector_module, f"DetectorConfig")
+
 M42 = Target('M42')
 M78 = Target('M78')
 blindalign = BlindAlign()
 stare = Stare()
-filter_L = SVQ100_ZWO(filter='L')
-filter_R = SVQ100_ZWO(filter='R')
-filter_G = SVQ100_ZWO(filter='G')
-filter_B = SVQ100_ZWO(filter='B')
-exp300_x12 = CMOSCameraConfig(exptime=300, nexp=12)
-exp10 = CMOSCameraConfig(exptime=10, nexp=1)
+filter_L = inst_config(filter='L')
+filter_R = inst_config(filter='R')
+filter_G = inst_config(filter='G')
+filter_B = inst_config(filter='B')
+exp300_x12 = detector_config(exptime=300, nexp=12)
+exp10 = detector_config(exptime=10, nexp=1)
 OBs = [FocusFitParabola(target=M42, align=blindalign, pattern=stare,
                         instconfig=filter_L, detconfig=exp10,
                         n_focus_positions=7, focus_step=50),
@@ -76,39 +78,34 @@ OBs = ObservingBlockList(OBs)
 ##-------------------------------------------------------------------------
 ## Read Configuration
 ##-------------------------------------------------------------------------
-root_path = Path(__file__).parent.joinpath('ocs/config')
-with open(root_path / 'config.yaml') as config_file:
-    config = yaml.safe_load(config_file)
-simulator_config = {'roof_time_to_open': 0,
-                    'roof_time_to_close': 0,
-                    'time_to_slew': 0,
-                    'time_to_park': 0,
-                    'exposure_overhead': 0,
-                    'open_fail_after': None,
-                    'open_random_fail_rate': 0.02,
-                    'close_fail_after': None,
-                    'close_random_fail_rate': 0.02,
-                    'slew_fail_after': None,
-                    'slew_random_fail_rate': 0.02,
-                    'park_fail_after': None,
-                    'park_random_fail_rate': 0.02,
-                    'configure_fail_after': None,
-                    'configure_random_fail_rate': 0.02,
-                    'expose_fail_after': None,
-                    'expose_random_fail_rate': 0.02}
+config = load_configuration()
 config['waittime'] = 0
-config['max_allowed_errors'] = 3
-config['Weather'] = Weather
-config['Roof'] = Roof
-config['Telescope'] = Telescope
-config['Instrument'] = Instrument
-config['Detector'] = Detector
-config['roof_config'] = simulator_config
-config['telescope_config'] = simulator_config
-config['instrument_config'] = simulator_config
-config['detector_config'] = simulator_config
+config['weather_config'] = {}
+config['roof_config'] = {'roof_time_to_open': 0,
+                         'roof_time_to_close': 0,
+                         'open_fail_after': None,
+                         'open_random_fail_rate': 0.02,
+                         'close_fail_after': None,
+                         'close_random_fail_rate': 0.02,                         }
+config['telescope_config'] = {'time_to_slew': 0,
+                              'time_to_park': 0,
+                              'slew_fail_after': None,
+                              'slew_random_fail_rate': 0.02,
+                              'park_fail_after': None,
+                              'park_random_fail_rate': 0.02,
+                              }
+config['instrument_config'] = {'configure_fail_after': None,
+                               'configure_random_fail_rate': 0.02,
+                              }
+config['detector_config'] = {'exposure_overhead': 0,
+                             'expose_fail_after': None,
+                             'expose_random_fail_rate': 0.02,
+                             }
 
 
+##-------------------------------------------------------------------------
+## Tests
+##-------------------------------------------------------------------------
 import pytest
 @pytest.mark.parametrize("test_input,expected", [(None, None)]*100)
 def test_random_failures(test_input, expected):

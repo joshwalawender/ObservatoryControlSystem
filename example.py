@@ -1,41 +1,38 @@
 from pathlib import Path
 import yaml
 from datetime import datetime
-
-from ocs.simulators.weather import Weather
-from ocs.simulators.roof import Roof
-from ocs.simulators.telescope import Telescope
-from ocs.simulators.instrument import Instrument
-from ocs.simulators.detector import Detector
+import importlib
 
 safety_file = Path('~/.safe.txt').expanduser()
 now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 with open(safety_file, 'a') as FO:
     FO.write(f'{now} safe\n')
 
-from ocs.observatory import RollOffRoof
 
-
-##-------------------------------------------------------------------------
-## Build some test OBs
-##-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# Build some test OBs
+#-------------------------------------------------------------------------
 from ocs.focusing import FocusFitParabola
-from ocs.instruments.SVQ100_ZWO import SVQ100_ZWO, CMOSCameraConfig
 from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
 from odl.target import Target, TargetList
 from odl.offset import Stare
 from odl.alignment import BlindAlign, MaskAlign
 
+instr_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
+detector_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
+inst_config = getattr(instr_module, f"InstrumentConfig")
+detector_config = getattr(detector_module, f"DetectorConfig")
+
 M42 = Target('M42')
 M78 = Target('M78')
 blindalign = BlindAlign()
 stare = Stare()
-filter_L = SVQ100_ZWO(filter='L')
-filter_R = SVQ100_ZWO(filter='R')
-filter_G = SVQ100_ZWO(filter='G')
-filter_B = SVQ100_ZWO(filter='B')
-exp300_x12 = CMOSCameraConfig(exptime=300, nexp=12)
-exp10 = CMOSCameraConfig(exptime=10, nexp=1)
+filter_L = inst_config(filter='L')
+filter_R = inst_config(filter='R')
+filter_G = inst_config(filter='G')
+filter_B = inst_config(filter='B')
+exp300_x12 = detector_config(exptime=300, nexp=12)
+exp10 = detector_config(exptime=10, nexp=1)
 OBs = [FocusFitParabola(target=M42, align=blindalign, pattern=stare,
                         instconfig=filter_L, detconfig=exp10,
                         n_focus_positions=7, focus_step=50),
@@ -63,26 +60,9 @@ OBs = ObservingBlockList(OBs)
 
 
 ##-------------------------------------------------------------------------
-## Read Configuration
-##-------------------------------------------------------------------------
-root_path = Path(__file__).parent.joinpath('ocs/config')
-with open(root_path / 'config.yaml') as FO:
-    config = yaml.safe_load(FO)
-with open(root_path.parent / 'simulators' / 'simulator_config.yaml') as FO:
-    simulator_config = yaml.safe_load(FO)
-config['Weather'] = Weather
-config['Roof'] = Roof
-config['roof_config'] = simulator_config
-config['Telescope'] = Telescope
-config['telescope_config'] = simulator_config
-config['Instrument'] = Instrument
-config['instrument_config'] = simulator_config
-config['Detector'] = Detector
-config['detector_config'] = simulator_config
-
-
-##-------------------------------------------------------------------------
 ## Instantiate the Observatory
 ##-------------------------------------------------------------------------
+from ocs.observatory import RollOffRoof, load_configuration
+config = load_configuration()
 obs = RollOffRoof(OBs=OBs, **config)
 obs.wake_up()

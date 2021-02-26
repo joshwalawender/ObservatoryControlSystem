@@ -2,7 +2,7 @@
 from time import sleep
 import random
 
-from ..exceptions import *
+from ocs.exceptions import *
 
 
 class Roof():

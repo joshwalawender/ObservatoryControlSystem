@@ -2,10 +2,10 @@
 from time import sleep
 import random
 
-from ..exceptions import *
+from ocs.exceptions import *
 
 
-class Detector():
+class DetectorController():
     def __init__(self, config={}):
         self.config = config
         self.name = 'simulator'

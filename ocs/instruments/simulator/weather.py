@@ -5,7 +5,7 @@ from datetime import datetime
 import random
 import numpy as np
 
-from ..exceptions import *
+from ocs.exceptions import *
 
 
 class Weather():
@@ -24,7 +24,7 @@ class Weather():
         return timestamp, safe
 
 
-    def is_safe(self, age_limit=600):
+    def is_safe(self, age_limit=300):
         with open(self.safety_file) as safety_file:
             lines = safety_file.readlines()
         timestamp, safe = self._evaluate_safety_line(lines[-1])

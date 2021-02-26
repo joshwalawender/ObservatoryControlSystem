@@ -6,3 +6,9 @@ initial_state: sleeping
 max_allowed_errors: 1
 waittime: 2
 maxwaits: 4
+
+weather: simulator
+roof: simulator
+telescope: simulator
+instrument: simulator
+detector: simulator
