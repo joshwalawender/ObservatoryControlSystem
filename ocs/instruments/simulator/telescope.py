@@ -6,7 +6,7 @@ from ocs.exceptions import *
 
 
 class Telescope():
-    def __init__(self, time_to_slew=0, time_to_park=0,
+    def __init__(self, logger=None, time_to_slew=0, time_to_park=0,
                  slew_fail_after=None, park_fail_after=None,
                  slew_random_fail_rate=0, park_random_fail_rate=0):
         self.parked = True

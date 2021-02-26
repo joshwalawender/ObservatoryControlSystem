@@ -6,8 +6,8 @@ from ocs.exceptions import *
 
 
 class InstrumentController():
-    def __init__(self, time_to_configure=0, configure_fail_after=None,
-                 configure_random_fail_rate=0):
+    def __init__(self, logger=None, time_to_configure=0,
+                 configure_fail_after=None, configure_random_fail_rate=0):
         self.name = 'simulator'
         self.time_to_configure = time_to_configure
         self.configure_count = 0

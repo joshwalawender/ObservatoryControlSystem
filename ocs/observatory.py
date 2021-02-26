@@ -107,17 +107,11 @@ class RollOffRoof():
         self.file_ndigits = file_ndigits
         self.file_outdir = Path(file_outdir).expanduser()
         # Components
-        self.weather = weather(**weather_config)
-        self.roof = roof(**roof_config)
-        self.telescope = telescope(**telescope_config)
-        self.instrument = instrument(**instrument_config)
-        self.detector = detector(**detector_config)
-
-#         if detector_config in [{}, None]:
-#             self.detector = detector()
-#         else:
-#             self.detector = detector(config=detector_config)
-
+        self.weather = weather(logger=log, **weather_config)
+        self.roof = roof(logger=log, **roof_config)
+        self.telescope = telescope(logger=log, **telescope_config)
+        self.instrument = instrument(logger=log, **instrument_config)
+        self.detector = detector(logger=log, **detector_config)
         self.scheduler = Scheduler(OBs=OBs)
         # Load States File
         states_file = root_path.joinpath(states_file)
@@ -446,16 +440,13 @@ class RollOffRoof():
 
 
     def configure_instrument(self):
-        if self.current_OB is not None:
-            self.log(f'configuring instrument: {self.current_OB.instconfig}')
-            try:
-                self.instrument.configure(self.current_OB.instconfig)
-            except InstrumentFailure as err:
-                self.log('Instrument configuration failed', level=logging.ERROR)
-                self.errors.append(err)
-                self.error_count += 1
-        else:
-            self.log('No OB to configure', level=logging.DEBUG)
+        self.log(f'configuring instrument: {self.current_OB.instconfig}')
+        try:
+            self.instrument.configure(self.current_OB.instconfig)
+        except InstrumentFailure as err:
+            self.log('Instrument configuration failed', level=logging.ERROR)
+            self.errors.append(err)
+            self.error_count += 1
         self.start_observation()
 
 

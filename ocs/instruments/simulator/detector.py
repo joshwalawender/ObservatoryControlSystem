@@ -6,8 +6,9 @@ from ocs.exceptions import *
 
 
 class DetectorController():
-    def __init__(self, exposure_overhead=0, simulate_exposure_time=True,
-                 expose_fail_after=None, expose_random_fail_rate=0):
+    def __init__(self, logger=None, exposure_overhead=0,
+                 expose_fail_after=None, expose_random_fail_rate=0,
+                 simulate_exposure_time=True,):
         self.name = 'simulator'
         self.exposure_count = 0
         self.exptime = 0

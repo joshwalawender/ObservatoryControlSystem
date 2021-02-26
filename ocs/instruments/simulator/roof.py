@@ -6,7 +6,7 @@ from ocs.exceptions import *
 
 
 class Roof():
-    def __init__(self, roof_time_to_open=0, roof_time_to_close=0,
+    def __init__(self, logger=None, roof_time_to_open=0, roof_time_to_close=0,
                  open_fail_after=None, close_fail_after=None,
                  open_random_fail_rate=0, close_random_fail_rate=0):
         self.is_open = False

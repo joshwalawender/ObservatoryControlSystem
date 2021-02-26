@@ -15,5 +15,5 @@ file_ndigits: 4
 weather: simulator
 roof: simulator
 telescope: simulator
-instrument: simulator
+instrument: SVQ100_ZWO
 detector: SVQ100_ZWO
