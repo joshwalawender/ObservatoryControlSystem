@@ -20,11 +20,12 @@ from transitions.extensions import GraphMachine as Machine
 # from transitions import Machine
 from transitions import State
 
-from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
+from odl.block import ObservingBlockList, ScienceBlock
 from odl.alignment import BlindAlign
 
 from .exceptions import *
 from .scheduler import Scheduler
+from .focusing import FocusFitParabola, FocusMaxRun
 
 
 ##-------------------------------------------------------------------------
@@ -401,7 +402,7 @@ class RollOffRoof():
                 # Slew Telescope
                 self.log(f'Slewing to: {self.current_OB.target}')
                 try:
-                    self.telescope.slew(self.current_OB.target)
+                    self.telescope.slew(self.current_OB.target.coord())
                 except TelescopeFailure as err:
                     self.log('Telescope slew failed', level=logging.ERROR)
                     self.errors.append(err)
@@ -450,20 +451,17 @@ class RollOffRoof():
         self.log('starting focusing')
         take_data_failed = True
         analyze_data_failed = True
-        if isinstance(self.current_OB, FocusBlock):
-            take_focus_data = getattr(self.current_OB, "take_focus_data", None)
-            if callable(take_focus_data) is True:
-                self.log(f'Taking focus data for {self.current_OB.blocktype}')
-                take_data_failed = not take_focus_data(self.instrument,
-                                                       self.detector)
-            analyze_focus_data = getattr(self.current_OB, "analyze_focus_data", None)
-            if callable(analyze_focus_data) is True:
-                self.log(f'Analyzing focus data for {self.current_OB.blocktype}')
-                analyze_data_failed = not analyze_focus_data(self.instrument)
+        if isinstance(self.current_OB, FocusFitParabola):
+            self.log(f'Focusing using simple parambola fit')
+            failed = False
+        elif isinstance(self.current_OB, FocusMaxRun):
+            self.log(f'Focusing using FocusMax')
+            failed = False
         else:
             self.log(f'Focus strategy {self.current_OB} is unknown',
                      level=logging.ERROR)
-        self.record_OB(failed=(take_data_failed or analyze_data_failed))
+            failed = True
+        self.record_OB(failed=failed)
         self.focusing_complete()
 
 

@@ -22,16 +22,11 @@ class FocusFitParabola(FocusBlock):
         self.refocus_if_near_edge = refocus_if_near_edge
 
 
-    def take_focus_data(self, focuser, detector, starting_focus_value=None):
-        '''Simple focusing algorithm which takes images at multiple focus
-        positions and determines the best focus by looking for the minimum FWHM.
-
-        Parameters
-        ----------
-        starting_focus_value : int
-        '''
-        return True
-
-
-    def analyze_focus_data(self, focuser):
-        return True
+class FocusMaxRun(FocusBlock):
+    '''Trigger a FocusMax run.
+    '''
+    def __init__(self, target=None, pattern=None, instconfig=None,
+                 detconfig=None, align=None, blocktype='FocusMaxRun',
+                 ):
+        super().__init__(target=target, pattern=pattern, instconfig=instconfig,
+                         detconfig=detconfig, align=align, blocktype=blocktype)

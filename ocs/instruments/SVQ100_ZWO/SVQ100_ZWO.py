@@ -4,10 +4,10 @@ from odl.block import FocusBlock
 
 # Use pypaca Camera as detector controller
 from pypaca import Camera as DetectorController
-from pypaca import Focuser, FilterWheel
+from pypaca import Focuser, FilterWheel, Telescope
 
 ##-------------------------------------------------------------------------
-## CMOSDetectorConfig
+## ODL DetectorConfig
 ##-------------------------------------------------------------------------
 class DetectorConfig(AbstractDetectorConfig):
     '''An object to hold information about a visible light detector
@@ -83,7 +83,7 @@ class DetectorConfig(AbstractDetectorConfig):
 
 
 ##-------------------------------------------------------------------------
-## SVQ100_ZWO InstrumentConfig
+## ODL InstrumentConfig
 ##-------------------------------------------------------------------------
 class InstrumentConfig(InstrumentConfig):
     '''InstrumentConfig object for a setup comprised of:
@@ -97,7 +97,7 @@ class InstrumentConfig(InstrumentConfig):
 
 
 ##-------------------------------------------------------------------------
-## SVQ100_ZWO Instrument Controller
+## Instrument Controller
 ##-------------------------------------------------------------------------
 class InstrumentController():
     def __init__(self, logger=None, IP='localhost', port=11111):
