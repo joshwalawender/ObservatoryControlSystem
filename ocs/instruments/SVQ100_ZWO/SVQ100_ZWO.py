@@ -1,14 +1,10 @@
-from odl.detector_config import DetectorConfig as AbstractDetectorConfig
-from odl.instrument_config import InstrumentConfig
-from odl.block import FocusBlock
-
-# Use pypaca Camera as detector controller
-from pypaca import Camera as DetectorController
-from pypaca import Focuser, FilterWheel, Telescope
+from astropy.io import fits
 
 ##-------------------------------------------------------------------------
 ## ODL DetectorConfig
 ##-------------------------------------------------------------------------
+from odl.detector_config import DetectorConfig as AbstractDetectorConfig
+
 class DetectorConfig(AbstractDetectorConfig):
     '''An object to hold information about a visible light detector
     configuration.  This is an abstract class which we expect to be subclassed
@@ -43,7 +39,7 @@ class DetectorConfig(AbstractDetectorConfig):
 
 
     def set_name(self):
-        self.name = f'{self.instrument}{self.detector} {self.exptime:.0f}s (gain {self.gain}) x{self.nexp}'
+        self.name = f'{self}{self.detector} {self.exptime:.0f}s (gain {self.gain}) x{self.nexp}'
 
 
     def to_dict(self):
@@ -83,8 +79,16 @@ class DetectorConfig(AbstractDetectorConfig):
 
 
 ##-------------------------------------------------------------------------
+## Detector Controller
+##-------------------------------------------------------------------------
+from pypaca import Camera as DetectorController
+
+
+##-------------------------------------------------------------------------
 ## ODL InstrumentConfig
 ##-------------------------------------------------------------------------
+from odl.instrument_config import InstrumentConfig
+
 class InstrumentConfig(InstrumentConfig):
     '''InstrumentConfig object for a setup comprised of:
     - ZWO Filter Wheel
@@ -99,7 +103,16 @@ class InstrumentConfig(InstrumentConfig):
 ##-------------------------------------------------------------------------
 ## Instrument Controller
 ##-------------------------------------------------------------------------
+from pypaca import Focuser, FilterWheel
+
 class InstrumentController():
+    '''
+    
+    Devices
+    -------
+    filterwheel : AlpacaDevice
+    focuser : AlpacaDevice
+    '''
     def __init__(self, logger=None, IP='localhost', port=11111):
         self.logger = logger
         self.filterwheel = FilterWheel(logger=logger, IP=IP, port=port)
@@ -113,3 +126,33 @@ class InstrumentController():
             self.filterwheel.set_position(ic.filter)
         if ic.focuspos is not None:
             self.focuser.move(ic.focuspos)
+
+
+    def collect_header_metadata(self):
+        h = fits.Header()
+        # FilterWheel
+        fpos, fname = self.filterwheel.position()
+        h['FILTER'] = (fname, 'Filter')
+        h['FILTERNO'] = (fpos, 'Filter Wheel Position')
+        h['FWNAME'] = (self.filterwheel.properties['name'],
+                       'Filter Wheel Name')
+        h['FWDRVRSN'] = (self.filterwheel.properties['driverversion'],
+                         'Filter Wheel Driver Version')
+        # Focus
+        h['FOCNAME'] = (self.focuser.properties['name'],
+                        'Focuser Name')
+        h['FOCDVRSN'] = (self.focuser.properties['driverversion'],
+                         'Focuser Driver Version')
+        h['FOCUSPOS'] = (self.focuser.position(),
+                         'Focuser Position')
+        h['FOCTCOMP'] = (self.focuser.tempcomp(),
+                         'Focuser Temperature Compensation')
+        h['FOCTEMP'] = (self.focuser.temperature(),
+                        'Focuser Temperature')
+        return h
+
+
+##-------------------------------------------------------------------------
+## Telescope
+##-------------------------------------------------------------------------
+from pypaca import Telescope
