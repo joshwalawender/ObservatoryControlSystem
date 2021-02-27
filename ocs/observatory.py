@@ -8,6 +8,7 @@ import numpy as np
 import yaml
 
 from astropy import units as u
+from astropy.io import fits
 from astropy import coordinates as c
 from astropy.time import Time
 from astropy.table import Table, Row
@@ -20,7 +21,7 @@ from transitions.extensions import GraphMachine as Machine
 # from transitions import Machine
 from transitions import State
 
-from odl.block import ObservingBlockList, ScienceBlock
+from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
 from odl.alignment import BlindAlign
 
 from .exceptions import *
@@ -397,6 +398,16 @@ class RollOffRoof():
     def begin_acquisition(self):
         if self.current_OB is not None:
             self.log(f'Executing {self.current_OB.align.name}')
+
+            # Unpark
+            if self.telescope.atpark() is True:
+                self.log('Unparking telescope')
+                self.telescope.unpark()
+            # Set tracking
+            if self.telescope.tracking() is False:
+                self.log('Turning on tracking')
+                self.telescope.set_tracking(True)
+
             # Blind Align
             if isinstance(self.current_OB.align, BlindAlign):
                 # Slew Telescope
@@ -472,6 +483,60 @@ class RollOffRoof():
         return fits_file
 
 
+    def collect_header_metadata(self):
+        h = fits.Header()
+        # Telescope
+        try:
+            h['TELNAME'] = (self.telescope.properties['name'],
+                            'Telescope Name')
+    #         h['TELDRVER'] = (self.telescope.properties['driverinfo'],
+    #                          'Telescope Driver Info')
+            h['TELDVRSN'] = (self.telescope.properties['driverversion'],
+                             'Telescope Driver Version')
+            h['ALT'] = (self.telescope.altitude(), 'Altitude (deg)')
+            h['AZ'] = (self.telescope.azimuth(), 'Azimuth (deg)')
+            h['RA'] = (self.telescope.rightascension(), 'Right Ascension (hours)')
+            h['DEC'] = (self.telescope.declination(), 'Declination (deg)')
+            h['RARATE'] = (self.telescope.rightascensionrate(), 'Right Ascension Rate')
+            h['DECRATE'] = (self.telescope.declinationrate(), 'Declination Rate')
+            h['PIERSIDE'] = (self.telescope.sideofpier(), 'Side of Pier')
+            h['TRACKING'] = (self.telescope.tracking(), 'Tracking')
+        except:
+            pass
+        # Filter
+        try:
+            fpos, fname = self.instrument.filterwheel.position()
+            h['FILTER'] = (fname, 'Filter')
+            h['FILTERNO'] = (fpos, 'Filter Wheel Position')
+            h['FWNAME'] = (self.instrument.filterwheel.properties['name'],
+                           'Filter Wheel Name')
+#             h['FWDRIVER'] = (self.instrument.filterwheel.properties['driverinfo'],
+#                              'Filter Wheel Driver Info')
+            h['FWDRVRSN'] = (self.instrument.filterwheel.properties['driverversion'],
+                             'Filter Wheel Driver Version')
+        except:
+            pass
+        # Focus
+        try:
+            h['FOCNAME'] = (self.instrument.focuser.properties['name'],
+                            'Focuser Name')
+#             h['FOCDRVER'] = (self.instrument.focuser.properties['driverinfo'],
+#                              'Focuser Driver Info')
+            h['FOCDVRSN'] = (self.instrument.focuser.properties['driverversion'],
+                             'Focuser Driver Version')
+            h['FOCUSPOS'] = (self.instrument.focuser.position(),
+                             'Focuser Position')
+            h['FOCTCOMP'] = (self.instrument.focuser.tempcomp(),
+                             'Focuser Temperature Compensation')
+            h['FOCTEMP'] = (self.instrument.focuser.temperature(),
+                            'Focuser Temperature')
+        except:
+            pass
+
+        # Return Header
+        return h
+
+
     def begin_observation(self):
         # set detector parameters
         # For now we assume only one detconfig
@@ -491,8 +556,9 @@ class RollOffRoof():
             # Take Data
             for i in range(dc.nexp):
                 self.log(f'  Starting {dc.exptime:.0f}s exposure ({i+1} of {dc.nexp})')
+                hdr = self.collect_header_metadata()
                 try:
-                    hdul = self.detector.expose()
+                    hdul = self.detector.expose(additional_header=hdr)
                 except DetectorFailure:
                     self.log('Detector failure', level=logging.ERROR)
                     self.error_count += 1
