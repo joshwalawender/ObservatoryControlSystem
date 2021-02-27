@@ -64,21 +64,27 @@ def load_configuration(config_file=None):
         sys.exit(0)
     with open(config_file) as FO:
         config = yaml.safe_load(FO)
-
     # Instantiate devices
-    devices_path = root_path/'instruments'
+    devices_path = root_path/'observatories'/config['name']/config['OTA']
+    module_base_str = f"ocs.observatories.{config['name']}.{config['OTA']}"
     for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
-        module = importlib.import_module(f"ocs.instruments.{config[component]}")
-        device_config_file = devices_path/f"{config[component]}"/f'{component}_config.yaml'
+        print(f'Loading {component}: {config[component]}')
+        if config[component] == 'simulator':
+            module = importlib.import_module(f"ocs.simulator.{component}")
+            device_config_file = root_path/"simulator"/f'{component}_config.yaml'
+        else:
+            module = importlib.import_module(module_base_str)#+f".{component}")
+            device_config_file = devices_path/f'{component}_config.yaml'
+        # Open the config file
         with open(device_config_file) as FO:
             config[f'{component}_config'] = yaml.safe_load(FO)
         if config[f'{component}_config'] is None:
             config[f'{component}_config'] = {}
+        # Create an instance of the device controller
         instancename = component.capitalize()
         if component in ['instrument', 'detector']:
             instancename += 'Controller'
         config[component] = getattr(module, instancename)
-
     return config
 
 
@@ -88,7 +94,7 @@ def load_configuration(config_file=None):
 class RollOffRoof():
     '''Simple observatory with roll off roof.
     '''
-    def __init__(self, name='myobservatory',
+    def __init__(self, name='myobservatory', OTA='OTA',
                  states_file='states.yaml',
                  transitions_file='transitions.yaml',
                  location_file = 'location.yaml',

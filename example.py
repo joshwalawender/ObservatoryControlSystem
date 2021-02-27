@@ -18,21 +18,18 @@ from odl.target import Target, TargetList
 from odl.offset import Stare
 from odl.alignment import BlindAlign, MaskAlign
 
-instr_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
-detector_module = importlib.import_module(f"ocs.instruments.SVQ100_ZWO")
-inst_config = getattr(instr_module, f"InstrumentConfig")
-detector_config = getattr(detector_module, f"DetectorConfig")
+from ocs.observatories.hokuula.SVQ100 import SVQ100Config, CMOSDetectorConfig
 
 t1 = Target('M31')
 t2 = Target('M78')
 blindalign = BlindAlign()
 stare = Stare()
-filter_L = inst_config(filter='L')
-filter_R = inst_config(filter='R')
-filter_G = inst_config(filter='G')
-filter_B = inst_config(filter='B')
-science_exp = detector_config(exptime=2, nexp=2)
-focus_exp = detector_config(exptime=1, nexp=1)
+filter_L = SVQ100Config(filter='L')
+filter_R = SVQ100Config(filter='R')
+filter_G = SVQ100Config(filter='G')
+filter_B = SVQ100Config(filter='B')
+science_exp = CMOSDetectorConfig(exptime=2, nexp=2)
+focus_exp = CMOSDetectorConfig(exptime=1, nexp=1)
 OBs = [FocusFitParabola(target=t1, align=blindalign, pattern=stare,
                         instconfig=filter_L, detconfig=focus_exp,
                         n_focus_positions=7, focus_step=50),

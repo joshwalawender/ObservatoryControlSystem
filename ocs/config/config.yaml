@@ -1,4 +1,5 @@
 name: hokuula
+OTA: SVQ100
 location_file: location.yaml
 states_file: states.yaml
 transitions_file: transitions.yaml
