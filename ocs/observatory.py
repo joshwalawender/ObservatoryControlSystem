@@ -486,7 +486,9 @@ class RollOffRoof():
     def begin_observation(self):
         # set detector parameters
         # For now we assume only one detconfig
+        obhdr = self.current_OB.to_header()
         dc = self.current_OB.detconfig[0]
+        obhdr += dc.to_header()
         self.log(f'Starting observation: {self.current_OB.pattern}: {dc}')
         self.detector.set_exptime(dc.exptime)
         if dc.gain is not None:
@@ -497,13 +499,15 @@ class RollOffRoof():
         if dc.window is not None:
             self.detector.set_window(dc.window)
         dataok = []
-        for position in self.current_OB.pattern:
+        for i,position in enumerate(self.current_OB.pattern):
             # Offset to position
+            obhdr['POSITION'] = (i+1, 'Offset Pattern Position Number')
             # Take Data
             for i in range(dc.nexp):
                 self.log(f'  Starting {dc.exptime:.0f}s exposure ({i+1} of {dc.nexp})')
                 hdr = self.telescope.collect_header_metadata()
                 hdr += self.instrument.collect_header_metadata()
+                hdr += obhdr
                 try:
                     hdul = self.detector.expose(additional_header=hdr)
                 except DetectorFailure:

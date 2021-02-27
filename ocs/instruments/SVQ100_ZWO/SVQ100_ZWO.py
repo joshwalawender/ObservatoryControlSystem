@@ -32,14 +32,25 @@ class DetectorConfig(AbstractDetectorConfig):
         self.binning = binning
         self.window = window
         self.gain = gain
-        if name is None:
-            self.set_name()
-        else:
-            self.name = name
+        self.set_name()
 
 
     def set_name(self):
         self.name = f'{self}{self.detector} {self.exptime:.0f}s (gain {self.gain}) x{self.nexp}'
+
+
+    def to_header(self):
+        h = fits.Header()
+        h['DCNAME'] = (self.name, 'Detector Config Name')
+        h['DCINSTR'] = (self.instrument, 'Detector Config Instrument Name')
+        h['DCDET'] = (self.detector, 'Detector Config Detector Name')
+        h['DCEXPT'] = (self.exptime, 'Detector Config Exptime (sec)')
+        h['DCNEXP'] = (self.nexp, 'Detector Config Number of Exposures')
+        h['DCRDMODE'] = (self.readoutmode, 'Detector Config Readout Mode')
+        h['DCBIN'] = (self.binning, 'Detector Config Binning')
+        h['DCWINDOW'] = (self.window, 'Detector Config Window')
+        h['DCGAIN'] = (self.gain, 'Detector Config Gain')
+        return h
 
 
     def to_dict(self):
@@ -95,9 +106,19 @@ class InstrumentConfig(InstrumentConfig):
     - Optec Focuser
     '''
     def __init__(self, filter='L', focuspos=None):
-        self.name = f'{filter} Filter'
+        super().__init__(name=f'{filter} Filter')
         self.filter = filter
         self.focuspos = focuspos
+
+
+    def to_header(self):
+        h = fits.Header()
+        h['ICNAME'] = (self.name, 'Instrument Config Name')
+        h['ICPKG'] = (self.package, 'Instrument Config Package Name')
+        h['ICINST'] = (self.instrument, 'Instrument Config Instrument Name')
+        h['ICFILT'] = (self.filter, 'Instrument Config Filter')
+        h['ICFOCPOS'] = (self.focuspos, 'Instrument Config Focus Position')
+        return h
 
 
 ##-------------------------------------------------------------------------

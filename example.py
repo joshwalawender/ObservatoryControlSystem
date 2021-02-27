@@ -31,8 +31,8 @@ filter_L = inst_config(filter='L')
 filter_R = inst_config(filter='R')
 filter_G = inst_config(filter='G')
 filter_B = inst_config(filter='B')
-science_exp = detector_config(exptime=10, nexp=2)
-focus_exp = detector_config(exptime=5, nexp=1)
+science_exp = detector_config(exptime=2, nexp=2)
+focus_exp = detector_config(exptime=1, nexp=1)
 OBs = [FocusFitParabola(target=t1, align=blindalign, pattern=stare,
                         instconfig=filter_L, detconfig=focus_exp,
                         n_focus_positions=7, focus_step=50),
