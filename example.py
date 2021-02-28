@@ -23,7 +23,7 @@ from ocs.observatories.hokuula.SVQ100 import SVQ100Config, CMOSDetectorConfig
 t1 = Target('M31')
 t2 = Target('M78')
 blindalign = BlindAlign()
-stare = Stare()
+stare = Stare(guide=False)
 filter_L = SVQ100Config(filter='L')
 filter_R = SVQ100Config(filter='R')
 filter_G = SVQ100Config(filter='G')
