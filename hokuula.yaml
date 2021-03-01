@@ -1,5 +1,5 @@
-name: testobs
-OTA: testota
+name: hokuula
+OTA: SVQ100
 location_file: location.yaml
 states_file: states.yaml
 transitions_file: transitions.yaml
@@ -16,6 +16,6 @@ datadir: ../data/
 
 weather: simulator
 roof: simulator
-telescope: simulator
-instrument: simulator
-detector: simulator
+telescope: SVQ100_ZWO
+instrument: SVQ100_ZWO
+detector: SVQ100_ZWO

@@ -6,6 +6,7 @@ from datetime import datetime
 import random
 import numpy as np
 import yaml
+import logging
 
 from astropy import units as u
 from astropy.io import fits
@@ -17,8 +18,8 @@ from astropy.table import Table, Row
 from astropy.utils.iers import conf
 conf.auto_max_age = None
 
-from transitions.extensions import GraphMachine as Machine
-# from transitions import Machine
+from transitions.extensions import GraphMachine
+from transitions import Machine
 from transitions import State
 
 from odl.block import ObservingBlockList, ScienceBlock, FocusBlock
@@ -30,35 +31,16 @@ from .focusing import FocusFitParabola, FocusMaxRun
 
 
 ##-------------------------------------------------------------------------
-## Create logger object
-##-------------------------------------------------------------------------
-import logging
-root_path = Path(__file__).parent.joinpath('config')
-with open(root_path / 'log_config.yaml') as log_config_file:
-    log_config = yaml.safe_load(log_config_file)
-log = logging.getLogger('RollOffRoof')
-log.setLevel(logging.DEBUG)
-## Set up console output
-LogConsoleHandler = logging.StreamHandler()
-LogConsoleHandler.setLevel(getattr(logging, log_config.get('loglevel_console').upper()))
-LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
-LogConsoleHandler.setFormatter(LogFormat)
-log.addHandler(LogConsoleHandler)
-## Set up file output
-# LogFileName = None
-# LogFileHandler = logging.FileHandler(LogFileName)
-# LogFileHandler.setLevel(logging.DEBUG)
-# LogFileHandler.setFormatter(LogFormat)
-# log.addHandler(LogFileHandler)
-
-
-##-------------------------------------------------------------------------
 ## Read Configuration
 ##-------------------------------------------------------------------------
 def load_configuration(config_file=None):
     root_path = Path(__file__).parent
     if config_file is None:
         config_file = root_path.joinpath('config/config.yaml')
+    elif isinstance(config_file, str):
+        config_file = Path(config_file)
+    if not isinstance(config_file, Path):
+        raise Exception(f'Could not read config_file: {config_file}')
     if config_file.exists() is False:
         print('No config file found')
         sys.exit(0)
@@ -85,7 +67,42 @@ def load_configuration(config_file=None):
         if component in ['instrument', 'detector']:
             instancename += 'Controller'
         config[component] = getattr(module, instancename)
+
     return config
+
+
+##-------------------------------------------------------------------------
+## Create logger object
+##-------------------------------------------------------------------------
+def create_log(config_file=None):
+    root_path = Path(__file__).parent
+    if config_file is None:
+        config_file = root_path.joinpath('config/log_config.yaml')
+    elif isinstance(config_file, str):
+        config_file = Path(config_file)
+    if not isinstance(config_file, Path):
+        raise Exception(f'Could not read log config_file: {config_file}')
+    if config_file.exists() is False:
+        print('No log config file found')
+        sys.exit(0)
+    with open(config_file) as FO:
+        log_config = yaml.safe_load(FO)
+
+    log = logging.getLogger('RollOffRoof')
+    log.setLevel(logging.DEBUG)
+    ## Set up console output
+    LogConsoleHandler = logging.StreamHandler()
+    LogConsoleHandler.setLevel(getattr(logging, log_config.get('loglevel_console').upper()))
+    LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
+    LogConsoleHandler.setFormatter(LogFormat)
+    log.addHandler(LogConsoleHandler)
+    ## Set up file output
+    # LogFileName = None
+    # LogFileHandler = logging.FileHandler(LogFileName)
+    # LogFileHandler.setLevel(logging.DEBUG)
+    # LogFileHandler.setFormatter(LogFormat)
+    # log.addHandler(LogFileHandler)
+    return log
 
 
 ##-------------------------------------------------------------------------
@@ -105,43 +122,52 @@ class RollOffRoof():
                  telescope=None, telescope_config={},
                  instrument=None, instrument_config={},
                  detector=None, detector_config={},
-                 datadir='~',
+                 datadir='~', lat=0, lon=0, height=0,
                  OBs=[],
                  ):
         self.name = name
-        self.datadir = Path(datadir).expanduser()
+        self.datadir = Path(datadir).expanduser().absolute()
+        self.logger = create_log()
         # Components
-        self.weather = weather(logger=log, **weather_config)
-        self.roof = roof(logger=log, **roof_config)
-        self.telescope = telescope(logger=log, **telescope_config)
-        self.instrument = instrument(logger=log, **instrument_config)
-        self.detector = detector(logger=log, **detector_config)
+        self.weather = weather(logger=self.logger, **weather_config)
+        self.roof = roof(logger=self.logger, **roof_config)
+        self.telescope = telescope(logger=self.logger, **telescope_config)
+        self.instrument = instrument(logger=self.logger, **instrument_config)
+        self.detector = detector(logger=self.logger, **detector_config)
         self.scheduler = Scheduler(OBs=OBs)
         # Load States File
-        states_file = root_path.joinpath(states_file)
+        states_file = Path(__file__).parent / 'config' / states_file
         with open(states_file.expanduser().absolute()) as FO:
             self.states = yaml.safe_load(FO)
         # Load Transitions File
-        transitions_file = root_path.joinpath(transitions_file)
+        transitions_file = Path(__file__).parent / 'config' / transitions_file
         with open(transitions_file.expanduser().absolute()) as FO:
             self.transitions = yaml.safe_load(FO)
-        # Load Location File
-        location_file = root_path.joinpath(location_file)
-        with open(location_file.expanduser().absolute()) as FO:
-            self.location_info = yaml.safe_load(FO)
-        self.location = c.EarthLocation(**self.location_info)
+        # Load Location
+        self.location = c.EarthLocation(lat=lat, lon=lon, height=height)
         self.waittime = waittime
         self.maxwait = maxwait
         self.wait_duration = 0
         self.max_allowed_errors = max_allowed_errors
-        self.machine = Machine(model=self,
-                               states=self.states,
-                               transitions=self.transitions,
-                               initial=initial_state,
-                               queued=True,
-                               use_pygraphviz=True,
-                               show_conditions=True,
-                               )
+        try:
+            raise Exception
+            self.machine = GraphMachine(model=self,
+                                        states=self.states,
+                                        transitions=self.transitions,
+                                        initial=initial_state,
+                                        queued=True,
+                                        use_pygraphviz=True,
+                                        show_conditions=True,
+                                        )
+            # Generate state diagram
+            self.machine.get_graph().draw('state_diagram.png', prog='dot')
+        except:
+            self.machine = Machine(model=self,
+                                   states=self.states,
+                                   transitions=self.transitions,
+                                   initial=initial_state,
+                                   queued=True,
+                                   )
         # Initialize Status Values
         self.startup_at = datetime.now()
         self.entered_state_at = datetime.now()
@@ -155,8 +181,6 @@ class RollOffRoof():
         self.errors = []
         self.error_count = 0
         self.software_errors = []
-        # Generate state diagram
-        self.machine.get_graph().draw('state_diagram.png', prog='dot')
 
 
     ##-------------------------------------------------------------------------
@@ -164,7 +188,7 @@ class RollOffRoof():
     def log(self, msg, level=logging.INFO):
         current_OB = f'{self.current_OB.blocktype} @ {self.current_OB.target}'\
                      if self.current_OB is not None else 'None'
-        log.log(level, f'{self.state:15s}|{current_OB:30s}: {msg}')
+        self.logger.log(level, f'{self.state:15s}|{current_OB:30s}: {msg}')
 
 
     def entry_timestamp(self):
@@ -198,21 +222,10 @@ class RollOffRoof():
         for transition in self.transitions:
             self.log(f'  {transition}', logging.DEBUG)
         # log location
-        self.log('Location Info', logging.DEBUG)
-        for key in self.location_info.keys():
-            self.log(f'  {key}: {self.location_info.get(key)}', logging.DEBUG)
-#         self.log(f'Roof parameters:', logging.DEBUG)
-#         for key in self.roof_config.keys():
-#             self.log(f'  {key}: {self.roof.config.get(key)}', logging.DEBUG)
-#         self.log(f'Telescope parameters:', logging.DEBUG)
-#         for key in self.telescope_config.keys():
-#             self.log(f'  {key}: {self.telescope.config.get(key)}', logging.DEBUG)
-#         self.log(f'Instrument parameters:', logging.DEBUG)
-#         for key in self.instrument_config.keys():
-#             self.log(f'  {key}: {self.instrument.config.get(key)}', logging.DEBUG)
-#         self.log(f'Detector parameters:', logging.DEBUG)
-#         for key in self.detector_config.keys():
-#             self.log(f'  {key}: {self.detector.config.get(key)}', logging.DEBUG)
+        self.log(f'  Location:')
+        self.log(f'    latitude = {self.location.lat:.6f}')
+        self.log(f'    longtiude = {self.location.lon:.6f}')
+        self.log(f'    height = {self.location.height:.0f}')
 
 
     def record_OB(self, failed=False):
