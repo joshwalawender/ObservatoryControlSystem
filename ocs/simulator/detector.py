@@ -41,8 +41,8 @@ class DetectorController():
         self.exposure_count += 1
         if self.expose_fail_after is not None:
             if self.exposure_count >= self.expose_fail_after:
-                raise DetectorFailure
+                raise DetectorFailure('Exposure count exceeded')
         if self.expose_random_fail_rate is not None:
-            if random.random() <= self.expose_random_fail_rate:
-                raise DetectorFailure
+            if random.random() < self.expose_random_fail_rate:
+                raise DetectorFailure('Random failure')
         return None

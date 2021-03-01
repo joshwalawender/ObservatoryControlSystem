@@ -22,23 +22,25 @@ class Roof():
 
     def open(self):
         self.is_open = True
-        sleep(self.roof_time_to_open)
+        if self.roof_time_to_open is not None:
+            sleep(self.roof_time_to_open)
         self.open_count += 1
         if self.open_fail_after is not None:
             if self.open_count >= self.open_fail_after:
-                raise RoofFailure
+                raise RoofFailure('Open count exceeded')
         if self.open_random_fail_rate is not None:
-            if random.random() <= self.open_random_fail_rate:
-                raise RoofFailure
+            if random.random() < self.open_random_fail_rate:
+                raise RoofFailure('Random failure')
 
 
     def close(self):
         self.close_count += 1
-        sleep(self.roof_time_to_close)
+        if self.roof_time_to_close is not None:
+            sleep(self.roof_time_to_close)
         if self.close_fail_after is not None:
             if self.close_count >= self.close_fail_after:
-                raise RoofFailure
+                raise RoofFailure('Clouse count exceeded')
         if self.close_random_fail_rate is not None:
-            if random.random() <= self.close_random_fail_rate:
-                raise RoofFailure
+            if random.random() < self.close_random_fail_rate:
+                raise RoofFailure('Random failure')
         self.is_open = False

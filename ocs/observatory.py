@@ -362,6 +362,7 @@ class RollOffRoof():
             self.log(f'Got OB: {self.current_OB}')
         except SchedulingFailure as err:
             self.log(f'Scheduling error: {err}', level=logging.ERROR)
+            self.log(f'{err}', level=logging.ERROR)
             self.software_errors.append(err)
 
 
@@ -391,6 +392,7 @@ class RollOffRoof():
             self.roof.open()
         except RoofFailure as err: 
             self.log('Problem opening roof!', level=logging.ERROR)
+            self.log(f'{err}', level=logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
             self.begin_end_of_night_shutdown()
@@ -403,6 +405,7 @@ class RollOffRoof():
             self.roof.close()
         except RoofFailure as err:
             self.log('Roof failure on closing', logging.ERROR)
+            self.log(f'{err}', level=logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
         self.done_closing()
@@ -429,6 +432,7 @@ class RollOffRoof():
                     self.telescope.slew(self.current_OB.target.coord())
                 except TelescopeFailure as err:
                     self.log('Telescope slew failed', level=logging.ERROR)
+                    self.log(f'{err}', level=logging.ERROR)
                     self.errors.append(err)
                     self.error_count += 1
                 else:
@@ -453,6 +457,7 @@ class RollOffRoof():
             self.telescope.park()
         except TelescopeFailure as err:
             self.log('Telescope parking failed', level=logging.ERROR)
+            self.log(f'{err}', level=logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
         else:
@@ -466,6 +471,7 @@ class RollOffRoof():
             self.instrument.configure(self.current_OB.instconfig)
         except InstrumentFailure as err:
             self.log('Instrument configuration failed', level=logging.ERROR)
+            self.log(f'{err}', level=logging.ERROR)
             self.errors.append(err)
             self.error_count += 1
         self.start_observation()
@@ -535,8 +541,9 @@ class RollOffRoof():
                 hdr += obhdr
                 try:
                     hdul = self.detector.expose(additional_header=hdr)
-                except DetectorFailure:
+                except DetectorFailure as err:
                     self.log('Detector failure', level=logging.ERROR)
+                    self.log(f'{err}', level=logging.ERROR)
                     hdul = None
                     self.error_count += 1
                 else:

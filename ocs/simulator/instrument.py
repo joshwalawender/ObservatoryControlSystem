@@ -22,10 +22,10 @@ class InstrumentController():
         self.configure_count += 1
         if self.configure_fail_after is not None:
             if self.configure_count >= self.configure_fail_after:
-                raise InstrumentFailure
+                raise InstrumentFailure('Configure count exceeded')
         if self.configure_random_fail_rate is not None:
-            if random.random() <= self.configure_random_fail_rate:
-                raise InstrumentFailure
+            if random.random() < self.configure_random_fail_rate:
+                raise InstrumentFailure('Random failure')
 
 
     def collect_header_metadata(self):

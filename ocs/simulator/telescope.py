@@ -29,10 +29,10 @@ class Telescope():
         self.slew_count += 1
         if self.slew_fail_after is not None:
             if self.slew_count >= self.slew_fail_after:
-                raise TelescopeFailure
+                raise TelescopeFailure('Slew count exceeded')
         if self.slew_random_fail_rate is not None:
-            if random.random() <= self.slew_random_fail_rate:
-                raise TelescopeFailure
+            if random.random() < self.slew_random_fail_rate:
+                raise TelescopeFailure('Random failure')
 
 
     def park(self):
@@ -40,10 +40,10 @@ class Telescope():
         self.park_count += 1
         if self.park_fail_after is not None:
             if self.park_count >= self.park_fail_after:
-                raise TelescopeFailure
+                raise TelescopeFailure('Park count exceeded')
         if self.park_random_fail_rate is not None:
-            if random.random() <= self.park_random_fail_rate:
-                raise TelescopeFailure
+            if random.random() < self.park_random_fail_rate:
+                raise TelescopeFailure('Random failure')
         self.istracking = False
         self.parked = True
 
