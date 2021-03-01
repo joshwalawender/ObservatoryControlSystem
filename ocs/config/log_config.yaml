@@ -1,3 +1,0 @@
-loglevel_console: info
-loglevel_file: debug
-logfile: ocs.log

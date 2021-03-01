@@ -19,3 +19,7 @@ roof: simulator
 telescope: simulator
 instrument: simulator
 detector: simulator
+
+loglevel_console: info
+loglevel_file: debug
+logfile: null

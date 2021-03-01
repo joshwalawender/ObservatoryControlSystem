@@ -19,3 +19,7 @@ roof: simulator
 telescope: SVQ100_ZWO
 instrument: SVQ100_ZWO
 detector: SVQ100_ZWO
+
+loglevel_console: info
+loglevel_file: debug
+logfile: ../data/hokuula.log

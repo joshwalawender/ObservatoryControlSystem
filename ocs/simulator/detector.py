@@ -34,7 +34,7 @@ class DetectorController():
         return
 
 
-    def expose(self):
+    def expose(self, additional_header=None):
         sleeptime = self.exposure_overhead + self.exptime
         if self.simulate_exposure_time is True:
             sleep(sleeptime)
@@ -45,3 +45,4 @@ class DetectorController():
         if self.expose_random_fail_rate is not None:
             if random.random() <= self.expose_random_fail_rate:
                 raise DetectorFailure
+        return None

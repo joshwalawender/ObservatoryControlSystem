@@ -3,6 +3,9 @@ import yaml
 from datetime import datetime
 import importlib
 
+from ocs.observatory import RollOffRoof, load_configuration
+
+
 def build_obs():
     # Set weather safety
     safety_file = Path('~/.safe.txt').expanduser()
@@ -59,12 +62,12 @@ def build_obs():
     ##-------------------------------------------------------------------------
     ## Instantiate the Observatory
     ##-------------------------------------------------------------------------
-    from ocs.observatory import RollOffRoof, load_configuration
     config = load_configuration('hokuula.yaml')
-    obs = RollOffRoof(OBs=OBs, **config)
-    return obs
+    return OBs, config
+    
 
 
 if __name__ == '__main__':
-    obs = build_obs()
+    OBs, config = build_obs()
+    obs = RollOffRoof(OBs=OBs, **config)
     obs.wake_up()

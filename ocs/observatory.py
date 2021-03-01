@@ -74,34 +74,24 @@ def load_configuration(config_file=None):
 ##-------------------------------------------------------------------------
 ## Create logger object
 ##-------------------------------------------------------------------------
-def create_log(config_file=None):
-    root_path = Path(__file__).parent
-    if config_file is None:
-        config_file = root_path.joinpath('config/log_config.yaml')
-    elif isinstance(config_file, str):
-        config_file = Path(config_file)
-    if not isinstance(config_file, Path):
-        raise Exception(f'Could not read log config_file: {config_file}')
-    if config_file.exists() is False:
-        print('No log config file found')
-        sys.exit(0)
-    with open(config_file) as FO:
-        log_config = yaml.safe_load(FO)
-
+def create_log(loglevel_console='INFO', logfile=None, loglevel_file='DEBUG'):
     log = logging.getLogger('RollOffRoof')
     log.setLevel(logging.DEBUG)
     ## Set up console output
     LogConsoleHandler = logging.StreamHandler()
-    LogConsoleHandler.setLevel(getattr(logging, log_config.get('loglevel_console').upper()))
+    LogConsoleHandler.setLevel(getattr(logging, f'{loglevel_console.upper()}'))
     LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
     LogConsoleHandler.setFormatter(LogFormat)
     log.addHandler(LogConsoleHandler)
+    log.info(f'Log started')
     ## Set up file output
-    # LogFileName = None
-    # LogFileHandler = logging.FileHandler(LogFileName)
-    # LogFileHandler.setLevel(logging.DEBUG)
-    # LogFileHandler.setFormatter(LogFormat)
-    # log.addHandler(LogFileHandler)
+    if logfile is not None:
+        LogFileName = Path(logfile)
+        LogFileHandler = logging.FileHandler(LogFileName)
+        LogFileHandler.setLevel(getattr(logging, f'{loglevel_file.upper()}'))
+        LogFileHandler.setFormatter(LogFormat)
+        log.addHandler(LogFileHandler)
+        log.info(f'Logging to {LogFileName}')
     return log
 
 
@@ -123,11 +113,14 @@ class RollOffRoof():
                  instrument=None, instrument_config={},
                  detector=None, detector_config={},
                  datadir='~', lat=0, lon=0, height=0,
+                 loglevel_console='INFO', logfile=None, loglevel_file='DEBUG',
                  OBs=[],
                  ):
         self.name = name
         self.datadir = Path(datadir).expanduser().absolute()
-        self.logger = create_log()
+        self.logger = create_log(loglevel_console=loglevel_console,
+                                 logfile=logfile,
+                                 loglevel_file=loglevel_file)
         # Components
         self.weather = weather(logger=self.logger, **weather_config)
         self.roof = roof(logger=self.logger, **roof_config)
@@ -248,7 +241,8 @@ class RollOffRoof():
 
     def night_summary(self):
         if self.error_count > 0:
-            log.warning(f'Encountered {self.error_count} errors')
+            self.log(f'Encountered {self.error_count} errors',
+                     level=logging.WARNING)
 
         total_duration = (datetime.now() - self.startup_at).total_seconds()
         duration_table = Table(names=('State', 'Duration', 'Percent'),
@@ -262,8 +256,8 @@ class RollOffRoof():
         duration_table['Percent'].unit = u.percent
         duration_table['Duration'].format = '.0f'
         duration_table['Duration'].unit = u.second
-        log.info(f'\n\n====== Timing ======\n{duration_table}\n')
-        log.info(f'\n\n====== Observed ======\n{self.executed}\n')
+        self.log(f'\n\n====== Timing ======\n{duration_table}\n')
+        self.log(f'\n\n====== Observed ======\n{self.executed}\n')
 
 
     ##-------------------------------------------------------------------------
@@ -543,6 +537,7 @@ class RollOffRoof():
                     hdul = self.detector.expose(additional_header=hdr)
                 except DetectorFailure:
                     self.log('Detector failure', level=logging.ERROR)
+                    hdul = None
                     self.error_count += 1
                 else:
                     dataok.append(True)

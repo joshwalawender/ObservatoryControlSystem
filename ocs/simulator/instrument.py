@@ -1,6 +1,7 @@
 #!python3
 from time import sleep
 import random
+from astropy.io import fits
 
 from ocs.exceptions import *
 
@@ -25,3 +26,7 @@ class InstrumentController():
         if self.configure_random_fail_rate is not None:
             if random.random() <= self.configure_random_fail_rate:
                 raise InstrumentFailure
+
+
+    def collect_header_metadata(self):
+        return fits.Header()

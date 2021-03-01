@@ -1,6 +1,7 @@
 #!python3
 from time import sleep
 import random
+from astropy.io import fits
 
 from ocs.exceptions import *
 
@@ -10,7 +11,7 @@ class Telescope():
                  slew_fail_after=None, park_fail_after=None,
                  slew_random_fail_rate=0, park_random_fail_rate=0):
         self.parked = True
-        self.tracking = False
+        self.istracking = False
         self.slew_count = 0
         self.park_count = 0
         self.time_to_slew = time_to_slew
@@ -23,7 +24,7 @@ class Telescope():
 
     def slew(self, target):
         self.parked = False
-        self.tracking = True
+        self.istracking = True
         sleep(self.time_to_slew)
         self.slew_count += 1
         if self.slew_fail_after is not None:
@@ -43,5 +44,25 @@ class Telescope():
         if self.park_random_fail_rate is not None:
             if random.random() <= self.park_random_fail_rate:
                 raise TelescopeFailure
-        self.tracking = False
+        self.istracking = False
         self.parked = True
+
+
+    def atpark(self):
+        return self.parked
+
+
+    def unpark(self):
+        self.parked = False 
+
+
+    def tracking(self):
+        return self.istracking
+
+
+    def set_tracking(self, value):
+        self.istracking = value
+
+
+    def collect_header_metadata(self):
+        return fits.Header()

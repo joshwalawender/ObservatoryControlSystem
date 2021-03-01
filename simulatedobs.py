@@ -1,7 +1,8 @@
 from pathlib import Path
-import yaml
 from datetime import datetime
-import importlib
+
+from ocs.observatory import RollOffRoof, load_configuration
+
 
 def build_obs():
     # Set weather safety
@@ -29,7 +30,7 @@ def build_obs():
     filter_R = SVQ100Config(filter='R')
     filter_G = SVQ100Config(filter='G')
     filter_B = SVQ100Config(filter='B')
-    science_exp = CMOSDetectorConfig(exptime=2, nexp=2)
+    science_exp = CMOSDetectorConfig(exptime=1, nexp=2)
     focus_exp = CMOSDetectorConfig(exptime=1, nexp=1)
     OBs = [FocusFitParabola(target=t1, align=blindalign, pattern=stare,
                             instconfig=filter_L, detconfig=focus_exp,
@@ -38,33 +39,28 @@ def build_obs():
                         instconfig=filter_L, detconfig=science_exp),
            ScienceBlock(target=t1, align=blindalign, pattern=stare,
                         instconfig=filter_R, detconfig=science_exp),
-#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-#                         instconfig=filter_G, detconfig=science_exp),
-#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-#                         instconfig=filter_B, detconfig=science_exp),
-#            FocusFitParabola(target=t2, align=blindalign, pattern=stare,
-#                             instconfig=filter_L, detconfig=focus_exp,
-#                             n_focus_positions=7, focus_step=50),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_L, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_R, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_G, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_B, detconfig=science_exp),
+           ScienceBlock(target=t1, align=blindalign, pattern=stare,
+                        instconfig=filter_G, detconfig=science_exp),
+           ScienceBlock(target=t1, align=blindalign, pattern=stare,
+                        instconfig=filter_B, detconfig=science_exp),
+           FocusFitParabola(target=t2, align=blindalign, pattern=stare,
+                            instconfig=filter_L, detconfig=focus_exp,
+                            n_focus_positions=7, focus_step=50),
+           ScienceBlock(target=t2, align=blindalign, pattern=stare,
+                        instconfig=filter_L, detconfig=science_exp),
+           ScienceBlock(target=t2, align=blindalign, pattern=stare,
+                        instconfig=filter_R, detconfig=science_exp),
+           ScienceBlock(target=t2, align=blindalign, pattern=stare,
+                        instconfig=filter_G, detconfig=science_exp),
+           ScienceBlock(target=t2, align=blindalign, pattern=stare,
+                        instconfig=filter_B, detconfig=science_exp),
            ]
     OBs = ObservingBlockList(OBs)
-
-    ##-------------------------------------------------------------------------
-    ## Instantiate the Observatory
-    ##-------------------------------------------------------------------------
-    from ocs.observatory import RollOffRoof, load_configuration
     config = load_configuration()
-    obs = RollOffRoof(OBs=OBs, **config)
-    return obs
+    return OBs, config
 
 
 if __name__ == '__main__':
-    obs = build_obs()
+    OBs, config = build_obs()
+    obs = RollOffRoof(OBs=OBs, **config)
     obs.wake_up()
