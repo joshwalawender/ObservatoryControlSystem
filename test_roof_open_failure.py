@@ -10,7 +10,7 @@ def test_roof_open_failure():
 
     simulatedobs = RollOffRoof(OBs=OBs, **config)
     simulatedobs.wake_up()
-    assert simulatedobs.state == 'pau'
+    assert simulatedobs.state == 'alert'
     assert simulatedobs.error_count <= config['max_allowed_errors']+2
 
 
