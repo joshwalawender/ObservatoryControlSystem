@@ -1,10 +1,15 @@
 from ocs.observatory import RollOffRoof
 from simulatedobs import build_obs
+from pathlib import Path
+
+
+logfile = Path(__file__.replace('test_', 'log_test_').replace('.py', '.txt'))
+if logfile.exists(): logfile.unlink()
 
 
 def test_roof_open_failure():
     OBs, config = build_obs()
-    config['logfile'] = __file__.replace('test_', 'log_test_').replace('.py', '.txt')
+    config['logfile'] = str(logfile)
 
     config['roof_config']['open_fail_after'] = 0
 

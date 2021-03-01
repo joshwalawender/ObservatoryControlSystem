@@ -75,23 +75,31 @@ def load_configuration(config_file=None):
 ## Create logger object
 ##-------------------------------------------------------------------------
 def create_log(loglevel_console='INFO', logfile=None, loglevel_file='DEBUG'):
-    log = logging.getLogger('RollOffRoof')
-    log.setLevel(logging.DEBUG)
-    ## Set up console output
-    LogConsoleHandler = logging.StreamHandler()
-    LogConsoleHandler.setLevel(getattr(logging, f'{loglevel_console.upper()}'))
-    LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
-    LogConsoleHandler.setFormatter(LogFormat)
-    log.addHandler(LogConsoleHandler)
-    log.info(f'Log started')
-    ## Set up file output
     if logfile is not None:
-        LogFileName = Path(logfile)
-        LogFileHandler = logging.FileHandler(LogFileName)
-        LogFileHandler.setLevel(getattr(logging, f'{loglevel_file.upper()}'))
-        LogFileHandler.setFormatter(LogFormat)
-        log.addHandler(LogFileHandler)
-        log.info(f'Logging to {LogFileName}')
+        logname = str(Path(logfile).name)
+        logname = logname.replace('log_', '').replace('.txt', '')
+    else:
+        logname = 'RollOffRoof'
+    log = logging.getLogger(logname)
+    if len(log.handlers) == 0:
+        log.setLevel(logging.DEBUG)
+        ## Set up console output
+        LogConsoleHandler = logging.StreamHandler()
+        LogConsoleHandler.setLevel(getattr(logging, f'{loglevel_console.upper()}'))
+        LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
+        LogConsoleHandler.setFormatter(LogFormat)
+        log.addHandler(LogConsoleHandler)
+        ## Set up file output
+        if logfile is not None:
+            LogFileName = Path(logfile)
+            LogFileHandler = logging.FileHandler(LogFileName)
+            LogFileHandler.setLevel(getattr(logging, f'{loglevel_file.upper()}'))
+            LogFileHandler.setFormatter(LogFormat)
+            log.addHandler(LogFileHandler)
+
+        log.info(f'Log Started: {logname}')
+        if logfile is not None:
+            log.info(f'Logging to {LogFileName}')
     return log
 
 

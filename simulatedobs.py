@@ -58,8 +58,8 @@ def build_obs():
     OBs = ObservingBlockList(OBs)
     config = load_configuration()
 
-    config['waittime'] = 0
-    config['maxwait'] = 0.1
+    config['waittime'] = 0.005
+    config['maxwait'] = 0.010
     config['weather_config'] = {}
     config['roof_config'] = {'roof_time_to_open': 0,
                              'roof_time_to_close': 0,

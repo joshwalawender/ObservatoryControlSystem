@@ -1,10 +1,15 @@
 from ocs.observatory import RollOffRoof
 from simulatedobs import build_obs
+from pathlib import Path
+
+
+logfile = Path(__file__.replace('test_', 'log_test_').replace('.py', '.txt'))
+if logfile.exists(): logfile.unlink()
 
 
 def test_no_equipment_errors():
     OBs, config = build_obs()
-    config['logfile'] = __file__.replace('test_', 'log_test_').replace('.py', '.txt')
+    config['logfile'] = str(logfile)
 
     simulatedobs = RollOffRoof(OBs=OBs, **config)
     simulatedobs.wake_up()
