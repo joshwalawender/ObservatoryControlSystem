@@ -64,6 +64,7 @@ class RollOffRoof():
         self.instrument = instrument(logger=self.logger, **instrument_config)
         self.detector = detector(logger=self.logger, **detector_config)
         self.scheduler = Scheduler(OBs=OBs)
+        
         # Load States File
         states_file = Path(__file__).parent / 'config' / states_file
         with open(states_file.expanduser().absolute()) as FO:
@@ -121,6 +122,25 @@ class RollOffRoof():
         self.errors = []
         self.error_count = 0
         self.software_errors = []
+
+        # Configure telescope hardware
+        self.log(f'Sending location info to mount')
+        self.telescope.set_sitelatitude(lat)
+        assert np.isclose(lat, self.telescope.sitelatitude())
+        self.telescope.set_sitelongitude(lon)
+        assert np.isclose(lon, self.telescope.sitelongitude())
+        self.telescope.set_siteelevation(height)
+        assert np.isclose(height, self.telescope.siteelevation())
+        self.log(f'Sending date and time to mount')
+        now = datetime.utcnow()
+        self.log(f'Computer time: {now.isoformat()}', level=logging.DEBUG)
+        self.telescope.set_utcdate(f"{now.isoformat()}Z")
+        mountnow_str = self.telescope.utcdate()
+        self.log(f'Mount time: {mountnow_str}', level=logging.DEBUG)
+        while len(mountnow_str) < 23: mountnow_str += '0'
+        mountnow = datetime.fromisoformat(mountnow_str)
+        dt = mountnow - now
+        assert dt.total_seconds() < 0.1
 
 
     ##-------------------------------------------------------------------------
