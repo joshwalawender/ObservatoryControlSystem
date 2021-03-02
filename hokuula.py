@@ -1,19 +1,10 @@
 from pathlib import Path
-import yaml
-from datetime import datetime
-import importlib
 
 from ocs import load_configuration
 from ocs.observatory import RollOffRoof
 
 
-def build_obs():
-    # Set weather safety
-    safety_file = Path('~/.safe.txt').expanduser()
-    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    with open(safety_file, 'a') as FO:
-        FO.write(f'{now} safe\n')
-
+def build_OBs():
     #-------------------------------------------------------------------------
     # Build some test OBs
     #-------------------------------------------------------------------------
@@ -60,16 +51,11 @@ def build_obs():
 #                         instconfig=filter_B, detconfig=science_exp),
            ]
     OBs = ObservingBlockList(OBs)
-
-    ##-------------------------------------------------------------------------
-    ## Instantiate the Observatory
-    ##-------------------------------------------------------------------------
-    config = load_configuration('hokuula.yaml')
-    return OBs, config
-    
+    return OBs
 
 
 if __name__ == '__main__':
-    OBs, config = build_obs()
-    obs = RollOffRoof(OBs=OBs, **config)
-    obs.wake_up()
+    OBs = build_OBs()
+    config = load_configuration('hokuula')
+    hokuula = RollOffRoof(OBs=OBs, **config)
+#     hokuula.wake_up()

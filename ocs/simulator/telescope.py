@@ -66,3 +66,35 @@ class Telescope():
 
     def collect_header_metadata(self):
         return fits.Header()
+
+
+    def set_sitelatitude(self, lat):
+        self.sitelat = lat
+
+
+    def sitelatitude(self):
+        return self.sitelat
+
+
+    def set_sitelongitude(self, lon):
+        self.sitelon = lon
+
+
+    def sitelongitude(self):
+        return self.sitelon
+
+
+    def set_siteelevation(self, el):
+        self.siteel = el
+
+
+    def siteelevation(self):
+        return self.siteel
+
+
+    def set_utcdate(self, utc):
+        self.utc = utc.strip('Z')
+
+
+    def utcdate(self):
+        return self.utc

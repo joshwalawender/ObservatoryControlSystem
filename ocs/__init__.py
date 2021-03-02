@@ -2,33 +2,31 @@ from pathlib import Path
 import importlib
 import yaml
 import logging
+import sys
+from astropy.table import Table
 
 
 ##-------------------------------------------------------------------------
-## Read Configuration
+## Load Configuration
 ##-------------------------------------------------------------------------
-def load_configuration(config_file=None):
-    root_path = Path(__file__).parent
-    if config_file is None:
-        config_file = root_path.joinpath('config/config.yaml')
-    elif isinstance(config_file, str):
-        config_file = Path(config_file)
-    if not isinstance(config_file, Path):
-        raise Exception(f'Could not read config_file: {config_file}')
+def load_configuration(obsname):
+    root_path = Path(__file__).parent/'observatories'/obsname
+    config_file = root_path / f'{obsname}.yaml'
     if config_file.exists() is False:
-        print('No config file found')
+        print(f'Config file not found: {config_file}')
         sys.exit(0)
     with open(config_file) as FO:
         config = yaml.safe_load(FO)
+    config['name'] = obsname
 
     # Instantiate devices
-    devices_path = root_path/'observatories'/config['name']/config['OTA']
+    devices_path = root_path/config['OTA']
     module_base_str = f"ocs.observatories.{config['name']}.{config['OTA']}"
     for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
         print(f'Loading {component}: {config[component]}')
         if config[component] == 'simulator':
             module = importlib.import_module(f"ocs.simulator.{component}")
-            device_config_file = root_path/"simulator"/f'{component}_config.yaml'
+            device_config_file = Path(__file__).parent/"simulator"/f'{component}_config.yaml'
         else:
             module = importlib.import_module(module_base_str)#+f".{component}")
             device_config_file = devices_path/f'{component}_config.yaml'
@@ -43,6 +41,13 @@ def load_configuration(config_file=None):
             instancename += 'Controller'
         config[component] = getattr(module, instancename)
 
+    # Read horizon
+    if type(config['horizon']) in [float, int]:
+        config['horizon'] = Table([{'az': 0, 'h': config['horizon']}])
+    else:
+        hpath = root_path / config['horizon']
+        config['horizon'] = Table.read(hpath, format='ascii.csv')
+        config['horizon'].sort('az')
     return config
 
 
@@ -74,7 +79,7 @@ def create_log(loglevel_console='INFO', logfile=None, loglevel_file='DEBUG'):
 
         log.info(f'Log Started: {logname}')
         if logfile is not None:
-            log.info(f'Logging to {LogFileName}')
+            log.info(f'Logging to {LogFileName.absolute()}')
     return log
 
 

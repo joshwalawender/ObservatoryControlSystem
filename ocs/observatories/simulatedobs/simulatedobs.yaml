@@ -1,4 +1,3 @@
-name: testobs
 OTA: testota
 location_file: location.yaml
 states_file: states.yaml

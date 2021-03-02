@@ -75,15 +75,7 @@ class RollOffRoof():
             self.transitions = yaml.safe_load(FO)
         # Load Location
         self.location = c.EarthLocation(lat=lat, lon=lon, height=height)
-        # Load Horizon
-        if type(horizon) in [float, int]:
-            self.horizon = Table([{'az': 0, 'h': horizon}])
-        elif type(horizon) in [str, Path]:
-            self.horizon = Table.read(Path(horizon), format='ascii.csv')
-            self.horizon.sort('az')
-        else:
-            raise Exception(f'Could not interpret horizon: {horizon}')
-
+        self.horizon = horizon
         # Instantiate State Machine
         try:
             self.machine = GraphMachine(model=self,
