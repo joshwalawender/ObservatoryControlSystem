@@ -1,4 +1,6 @@
 from astropy.io import fits
+from astropy import units as u
+
 
 ##-------------------------------------------------------------------------
 ## ODL InstrumentConfig
@@ -12,6 +14,16 @@ class SVQ100Config(InstrumentConfig):
     '''
     def __init__(self, filter='L', focuspos=None):
         super().__init__(name=f'{filter} Filter')
+        filter_wavelengths = {'L': 550*u.nm, # 396-705
+                              'R': 530*u.nm, # 592-690
+                              'G': 530*u.nm, # 492-572
+                              'B': 450*u.nm, # 397-506
+                              'Ha': 656.3*u.nm,
+                              'Empty': 600*u.nm, 
+                              'Grating': 0.5*u.micron,
+                              'Dark': 0.5*u.micron}
+        if filter in filter_wavelengths.keys():
+            self.obswl = filter_wavelengths[filter]
         self.filter = filter
         self.focuspos = focuspos
 

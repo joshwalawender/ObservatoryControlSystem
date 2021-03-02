@@ -47,6 +47,10 @@
   conditions: [no_target]
 - trigger: acquire
   source: waiting_open
+  dest: waiting_open
+  conditions: [below_horizon]
+- trigger: acquire
+  source: waiting_open
   dest: acquiring
   conditions: []
 

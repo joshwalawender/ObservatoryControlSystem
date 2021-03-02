@@ -23,3 +23,6 @@ detector: SVQ100_ZWO
 loglevel_console: info
 loglevel_file: debug
 logfile: ../data/hokuula.log
+
+#horizon: 25
+horizon: hokuula_horizon.csv

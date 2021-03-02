@@ -1,7 +1,8 @@
 from pathlib import Path
 from datetime import datetime
 
-from ocs.observatory import RollOffRoof, load_configuration
+from ocs import load_configuration
+from ocs.observatory import RollOffRoof
 
 
 def build_obs():

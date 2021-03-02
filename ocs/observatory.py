@@ -1,6 +1,5 @@
 #!python3
 from pathlib import Path
-import importlib
 from time import sleep
 from datetime import datetime
 import random
@@ -11,7 +10,7 @@ import logging
 from astropy import units as u
 from astropy.io import fits
 from astropy import coordinates as c
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from astropy.table import Table, Row
 
 # Suppress IERS download failure
@@ -28,79 +27,7 @@ from odl.alignment import BlindAlign
 from .exceptions import *
 from .scheduler import Scheduler
 from .focusing import FocusFitParabola, FocusMaxRun
-
-
-##-------------------------------------------------------------------------
-## Read Configuration
-##-------------------------------------------------------------------------
-def load_configuration(config_file=None):
-    root_path = Path(__file__).parent
-    if config_file is None:
-        config_file = root_path.joinpath('config/config.yaml')
-    elif isinstance(config_file, str):
-        config_file = Path(config_file)
-    if not isinstance(config_file, Path):
-        raise Exception(f'Could not read config_file: {config_file}')
-    if config_file.exists() is False:
-        print('No config file found')
-        sys.exit(0)
-    with open(config_file) as FO:
-        config = yaml.safe_load(FO)
-    # Instantiate devices
-    devices_path = root_path/'observatories'/config['name']/config['OTA']
-    module_base_str = f"ocs.observatories.{config['name']}.{config['OTA']}"
-    for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
-        print(f'Loading {component}: {config[component]}')
-        if config[component] == 'simulator':
-            module = importlib.import_module(f"ocs.simulator.{component}")
-            device_config_file = root_path/"simulator"/f'{component}_config.yaml'
-        else:
-            module = importlib.import_module(module_base_str)#+f".{component}")
-            device_config_file = devices_path/f'{component}_config.yaml'
-        # Open the config file
-        with open(device_config_file) as FO:
-            config[f'{component}_config'] = yaml.safe_load(FO)
-        if config[f'{component}_config'] is None:
-            config[f'{component}_config'] = {}
-        # Create an instance of the device controller
-        instancename = component.capitalize()
-        if component in ['instrument', 'detector']:
-            instancename += 'Controller'
-        config[component] = getattr(module, instancename)
-
-    return config
-
-
-##-------------------------------------------------------------------------
-## Create logger object
-##-------------------------------------------------------------------------
-def create_log(loglevel_console='INFO', logfile=None, loglevel_file='DEBUG'):
-    if logfile is not None:
-        logname = str(Path(logfile).name)
-        logname = logname.replace('log_', '').replace('.txt', '')
-    else:
-        logname = 'RollOffRoof'
-    log = logging.getLogger(logname)
-    if len(log.handlers) == 0:
-        log.setLevel(logging.DEBUG)
-        ## Set up console output
-        LogConsoleHandler = logging.StreamHandler()
-        LogConsoleHandler.setLevel(getattr(logging, f'{loglevel_console.upper()}'))
-        LogFormat = logging.Formatter('%(asctime)s %(levelname)7s %(message)s')
-        LogConsoleHandler.setFormatter(LogFormat)
-        log.addHandler(LogConsoleHandler)
-        ## Set up file output
-        if logfile is not None:
-            LogFileName = Path(logfile)
-            LogFileHandler = logging.FileHandler(LogFileName)
-            LogFileHandler.setLevel(getattr(logging, f'{loglevel_file.upper()}'))
-            LogFileHandler.setFormatter(LogFormat)
-            log.addHandler(LogFileHandler)
-
-        log.info(f'Log Started: {logname}')
-        if logfile is not None:
-            log.info(f'Logging to {LogFileName}')
-    return log
+from . import load_configuration, create_log
 
 
 ##-------------------------------------------------------------------------
@@ -121,6 +48,7 @@ class RollOffRoof():
                  instrument=None, instrument_config={},
                  detector=None, detector_config={},
                  datadir='~', lat=0, lon=0, height=0,
+                 horizon=0,
                  loglevel_console='INFO', logfile=None, loglevel_file='DEBUG',
                  OBs=[],
                  ):
@@ -146,12 +74,17 @@ class RollOffRoof():
             self.transitions = yaml.safe_load(FO)
         # Load Location
         self.location = c.EarthLocation(lat=lat, lon=lon, height=height)
-        self.waittime = waittime
-        self.maxwait = maxwait
-        self.wait_duration = 0
-        self.max_allowed_errors = max_allowed_errors
+        # Load Horizon
+        if type(horizon) in [float, int]:
+            self.horizon = Table([{'az': 0, 'h': horizon}])
+        elif type(horizon) in [str, Path]:
+            self.horizon = Table.read(Path(horizon), format='ascii.csv')
+            self.horizon.sort('az')
+        else:
+            raise Exception(f'Could not interpret horizon: {horizon}')
+
+        # Instantiate State Machine
         try:
-            raise Exception
             self.machine = GraphMachine(model=self,
                                         states=self.states,
                                         transitions=self.transitions,
@@ -169,6 +102,12 @@ class RollOffRoof():
                                    initial=initial_state,
                                    queued=True,
                                    )
+        # Operational Properties
+        self.waittime = waittime
+        self.maxwait = maxwait
+        self.wait_duration = 0
+        self.max_allowed_errors = max_allowed_errors
+        
         # Initialize Status Values
         self.startup_at = datetime.now()
         self.entered_state_at = datetime.now()
@@ -360,6 +299,51 @@ class RollOffRoof():
     def roof_err(self):
         roof_errors = [isinstance(w, RoofFailure) for w in self.errors]
         return np.any(roof_errors)
+
+
+    def get_horizon(self, az):
+        '''Return the alt of the horizon for a given az
+        '''
+        def linterp(x1, y1, x2, y2, x3):
+            return y1 + (y2-y1)*(x3-x1)/(x2-x1)
+
+        if len(self.horizon) == 1:
+            h = self.horizon['h'][0]
+        elif az < self.horizon['az'][0]:
+            h = self.horizon['h'][0]
+        elif az > self.horizon['az'][-1]:
+            h = linterp(self.horizon['az'][-1], self.horizon['h'][-1],
+                        self.horizon['az'][0]+360, self.horizon['h'][0],
+                        az)
+        else:
+            low = self.horizon[self.horizon['az'] < az]
+            high = self.horizon[self.horizon['az'] >= az]
+            h = linterp(low['az'][-1], low['h'][-1],
+                        high['az'][0], high['h'][0],
+                        az)
+        return h
+
+
+    def below_horizon(self):
+        '''Check of the current OB is below the defined horizon or is about to
+        set within the duration of the OB.
+        '''
+        duration = TimeDelta(self.current_OB.estimate_duration(), format='sec')
+        altazframe = c.AltAz(obstime=Time.now() + duration,
+                             location=self.location,
+                             obswl=self.current_OB.instconfig.obswl,
+#                              pressure=, temperature=,
+#                              relative_humidity=,
+                             )
+        altaz_coord = self.current_OB.target.coord().transform_to(altazframe)
+        self.log(f'OB will end at (alt, az) = ({altaz_coord.alt:.1f}, {altaz_coord.az:.1f})')
+
+        h = self.get_horizon(altaz_coord.az.value)
+        self.log(f'Horizon is {h:.1f} at {altaz_coord.az:.1f}')
+        below = altaz_coord.alt.value <= h
+        if below is True:
+            self.log(f'Target is or will set below the horizon', level=logging.ERROR)
+        return below
 
 
     ##-------------------------------------------------------------------------
