@@ -14,41 +14,39 @@ def build_OBs():
     from odl.offset import Stare
     from odl.alignment import BlindAlign, MaskAlign
 
-    from ocs.observatories.hokuula.SVQ100 import SVQ100Config, ZWODetectorConfig
+    from ocs.observatories.hokuula import InstrumentConfig
+    from ocs.observatories.hokuula.SVQ100 import SVQ100DetectorConfig
+    from ocs.observatories.hokuula.SVX152 import SVX152DetectorConfig
 
     t1 = Target('M31')
     t2 = Target('M78')
     blindalign = BlindAlign()
     stare = Stare(guide=False)
-    filter_L = SVQ100Config(filter='L')
-    filter_R = SVQ100Config(filter='R')
-    filter_G = SVQ100Config(filter='G')
-    filter_B = SVQ100Config(filter='B')
-    science_exp = ZWODetectorConfig(exptime=2, nexp=2)
-    focus_exp = ZWODetectorConfig(exptime=1, nexp=1)
+    filter_L = InstrumentConfig(filter='L')
+    filter_R = InstrumentConfig(filter='R')
+    filter_G = InstrumentConfig(filter='G')
+    filter_B = InstrumentConfig(filter='B')
+    SVQ100_exp = SVQ100DetectorConfig(exptime=2, nexp=2)
+    SVQ100_focus_exp = SVQ100DetectorConfig(exptime=1, nexp=1)
+    SVX152_exp = SVX152DetectorConfig(exptime=2, nexp=2)
+    SVX152_focus_exp = SVX152DetectorConfig(exptime=1, nexp=1)
 
     OBs = [FocusFitParabola(target=t1, align=blindalign, pattern=stare,
-                            instconfig=filter_L, detconfig=focus_exp,
+                            instconfig=filter_L,
+                            detconfig=[SVQ100_focus_exp, SVX152_focus_exp],
                             n_focus_positions=7, focus_step=50),
            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-                        instconfig=filter_L, detconfig=science_exp),
-#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-#                         instconfig=filter_R, detconfig=science_exp),
-#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-#                         instconfig=filter_G, detconfig=science_exp),
-#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
-#                         instconfig=filter_B, detconfig=science_exp),
-           FocusFitParabola(target=t2, align=blindalign, pattern=stare,
-                            instconfig=filter_L, detconfig=focus_exp,
-                            n_focus_positions=7, focus_step=50),
-           ScienceBlock(target=t2, align=blindalign, pattern=stare,
-                        instconfig=filter_L, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_R, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_G, detconfig=science_exp),
-#            ScienceBlock(target=t2, align=blindalign, pattern=stare,
-#                         instconfig=filter_B, detconfig=science_exp),
+                        instconfig=filter_L,
+                        detconfig=[SVQ100_exp, SVX152_exp]),
+           ScienceBlock(target=t1, align=blindalign, pattern=stare,
+                        instconfig=filter_R,
+                        detconfig=[SVQ100_exp, SVX152_exp]),
+           ScienceBlock(target=t1, align=blindalign, pattern=stare,
+                        instconfig=filter_G,
+                        detconfig=[SVQ100_exp, SVX152_exp]),
+           ScienceBlock(target=t1, align=blindalign, pattern=stare,
+                        instconfig=filter_B,
+                        detconfig=[SVQ100_exp, SVX152_exp]),
            ]
     OBs = ObservingBlockList(OBs)
     return OBs
@@ -59,3 +57,24 @@ if __name__ == '__main__':
     config = load_configuration('hokuula')
     hokuula = RollOffRoof(OBs=OBs, **config)
 #     hokuula.wake_up()
+
+
+#     import zmq
+#     from time import sleep
+#     import struct
+#     
+#     def send_recv(socket, msg):
+#         print(f'Sending {msg}')
+#         socket.send(bytes(msg, 'utf-8'))
+#         msg = socket.recv()
+#         return msg
+#     
+#     context = zmq.Context()
+#     socket = context.socket(zmq.PAIR)
+#     socket.connect("tcp://192.168.4.56:5555")
+#     
+#     result = send_recv(socket, 'set_exptime 3')
+#     print(result.decode())
+#     im = send_recv(socket, 'expose')
+    
+

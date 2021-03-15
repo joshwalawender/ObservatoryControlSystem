@@ -3,7 +3,7 @@
   on_exit:  [log_wakeup, exit_timestamp]
 
 - name: waiting_closed
-  on_enter: [entry_timestamp, wait]
+  on_enter: [entry_timestamp, setup_detector, wait]
   on_exit:  [exit_timestamp]
 
 - name: waiting_open

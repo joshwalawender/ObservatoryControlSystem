@@ -7,12 +7,12 @@ from astropy import units as u
 ##-------------------------------------------------------------------------
 from odl.instrument_config import InstrumentConfig
 
-class SVQ100Config(InstrumentConfig):
+class HokuulaInstrumentConfig(InstrumentConfig):
     '''InstrumentConfig object for a setup comprised of:
     - ZWO Filter Wheel
-    - Optec Focuser
+    - Optec Focuser with 2 focusers attached
     '''
-    def __init__(self, filter='L', focuspos=None):
+    def __init__(self, filter='L', focuspos1=None, focuspos2=None):
         super().__init__(name=f'{filter} Filter')
         filter_wavelengths = {'L': 550*u.nm, # 396-705
                               'R': 530*u.nm, # 592-690
@@ -25,7 +25,8 @@ class SVQ100Config(InstrumentConfig):
         if filter in filter_wavelengths.keys():
             self.obswl = filter_wavelengths[filter]
         self.filter = filter
-        self.focuspos = focuspos
+        self.focuspos1 = focuspos1
+        self.focuspos2 = focuspos2
 
 
     def to_header(self):
@@ -34,7 +35,8 @@ class SVQ100Config(InstrumentConfig):
         h['ICPKG'] = (self.package, 'Instrument Config Package Name')
         h['ICINST'] = (self.instrument, 'Instrument Config Instrument Name')
         h['ICFILT'] = (self.filter, 'Instrument Config Filter')
-        h['ICFOCPOS'] = (self.focuspos, 'Instrument Config Focus Position')
+        h['ICFOC1'] = (self.focuspos1, 'Instrument Config Focus Position 1')
+        h['ICFOC2'] = (self.focuspos2, 'Instrument Config Focus Position 2')
         return h
 
 

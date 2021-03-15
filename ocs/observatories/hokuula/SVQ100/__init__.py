@@ -1,4 +1,2 @@
-from .config import SVQ100Config, InstrumentController
-from .detector import ZWODetectorConfig, DetectorController
-from pypaca import Telescope
-from ocs import simulator
+from pypaca import Camera as DetectorController
+from .detector import ZWODetectorConfig as SVQ100DetectorConfig

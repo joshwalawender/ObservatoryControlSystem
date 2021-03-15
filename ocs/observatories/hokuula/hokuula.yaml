@@ -1,4 +1,10 @@
-OTA: SVQ100
+weather: simulator
+roof: simulator
+telescope: ParamountME
+OTAs:
+ - SVQ100
+ - SVX152
+
 location_file: location.yaml
 states_file: states.yaml
 transitions_file: transitions.yaml
@@ -12,12 +18,6 @@ max_allowed_errors: 1
 waittime: 2
 maxwait: 10
 datadir: ../data/
-
-weather: simulator
-roof: simulator
-telescope: SVQ100_ZWO
-instrument: SVQ100_ZWO
-detector: SVQ100_ZWO
 
 loglevel_console: info
 loglevel_file: debug

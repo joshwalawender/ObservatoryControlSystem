@@ -20,16 +20,21 @@ def load_configuration(obsname):
     config['name'] = obsname
 
     # Instantiate devices
-    devices_path = root_path/config['OTA']
-    module_base_str = f"ocs.observatories.{config['name']}.{config['OTA']}"
+    devices_path = root_path
+    module_base_str = f"ocs.observatories.{config['name']}"
     for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
         print(f'Loading {component}: {config[component]}')
         if config[component] == 'simulator':
             module = importlib.import_module(f"ocs.simulator.{component}")
             device_config_file = Path(__file__).parent/"simulator"/f'{component}_config.yaml'
         else:
-            module = importlib.import_module(module_base_str)#+f".{component}")
-            device_config_file = devices_path/f'{component}_config.yaml'
+            if component in ['instrument', 'detector']:
+                # Import based on the OTA
+                module = importlib.import_module(f'{module_base_str}.{config["OTA"]}')
+                device_config_file = root_path/config["OTA"]/f'{component}_config.yaml'
+            else:
+                module = importlib.import_module(module_base_str)
+                device_config_file = root_path/f'{component}_config.yaml'
         # Open the config file
         with open(device_config_file) as FO:
             config[f'{component}_config'] = yaml.safe_load(FO)

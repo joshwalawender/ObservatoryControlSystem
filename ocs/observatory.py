@@ -372,6 +372,10 @@ class RollOffRoof():
 
     ##-------------------------------------------------------------------------
     ## On Entry Tasks for States
+    def cool_detector(self):
+        pass
+
+
     def wait(self):
         sleep(0.0006)
         self.wait_duration = (datetime.now() - self.entered_state_at).total_seconds()
