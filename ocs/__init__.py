@@ -18,6 +18,56 @@ def load_configuration(obsname):
     with open(config_file) as FO:
         config = yaml.safe_load(FO)
     config['name'] = obsname
+    # Instantiate devices
+    devices_path = root_path
+    module_base_str = f"ocs.observatories.{config['name']}"
+    for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
+        print(f'Loading {component}')
+        print(config[f'{component}_config'])
+        if component == 'detector':
+            module = importlib.import_module(module_base_str)
+        else:
+            if config[f'{component}_config']['name'] == 'simulator':
+                module = importlib.import_module(f"ocs.simulator.{component}")
+            else:
+                module = importlib.import_module(module_base_str)
+        # Create an instance of the device controller
+        instancename = component.capitalize()
+        if component == 'instrument':
+            instancename += 'Controller'
+        if component == 'detector':
+            config[component] = []
+            for det in config['detector_config']:
+                instancename = f'{det["name"]}DetectorController'
+                det.pop('name')
+                config[component].append(getattr(module, instancename))
+        else:
+            config[component] = getattr(module, instancename)
+            config[f'{component}_config'].pop('name')
+
+    # Read horizon
+    if type(config['horizon']) in [float, int]:
+        config['horizon'] = Table([{'az': 0, 'h': config['horizon']}])
+    else:
+        hpath = root_path / config['horizon']
+        config['horizon'] = Table.read(hpath, format='ascii.csv')
+        config['horizon'].sort('az')
+    return config
+
+
+
+
+
+
+def old_load_configuration(obsname):
+    root_path = Path(__file__).parent/'observatories'/obsname
+    config_file = root_path / f'{obsname}.yaml'
+    if config_file.exists() is False:
+        print(f'Config file not found: {config_file}')
+        sys.exit(0)
+    with open(config_file) as FO:
+        config = yaml.safe_load(FO)
+    config['name'] = obsname
 
     # Instantiate devices
     devices_path = root_path

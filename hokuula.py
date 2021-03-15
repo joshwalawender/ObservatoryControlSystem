@@ -14,7 +14,7 @@ def build_OBs():
     from odl.offset import Stare
     from odl.alignment import BlindAlign, MaskAlign
 
-    from ocs.observatories.hokuula import HokuulaConfig
+    from ocs.observatories.hokuula import InstrumentConfig
     from ocs.observatories.hokuula import ZWODetectorConfig
     from ocs.observatories.hokuula import CanonDetectorConfig
 
@@ -26,15 +26,16 @@ def build_OBs():
     filter_R = InstrumentConfig(filter='R')
     filter_G = InstrumentConfig(filter='G')
     filter_B = InstrumentConfig(filter='B')
-    SVQ100_exp = SVQ100DetectorConfig(exptime=2, nexp=2)
-    SVQ100_focus_exp = SVQ100DetectorConfig(exptime=1, nexp=1)
-    SVX152_exp = SVX152DetectorConfig(exptime=2, nexp=2)
-    SVX152_focus_exp = SVX152DetectorConfig(exptime=1, nexp=1)
+    SVQ100_exp = ZWODetectorConfig(exptime=2, nexp=2)
+    SVQ100_focus_exp = ZWODetectorConfig(exptime=1, nexp=1)
+    SVX152_exp = CanonDetectorConfig(exptime=2, nexp=2)
+    SVX152_focus_exp = CanonDetectorConfig(exptime=1, nexp=1)
 
-    OBs = [FocusFitParabola(target=t1, align=blindalign, pattern=stare,
-                            instconfig=filter_L,
-                            detconfig=[SVQ100_focus_exp, SVX152_focus_exp],
-                            n_focus_positions=7, focus_step=50),
+    OBs = [
+#            FocusFitParabola(target=t1, align=blindalign, pattern=stare,
+#                             instconfig=filter_L,
+#                             detconfig=[SVQ100_focus_exp, SVX152_focus_exp],
+#                             n_focus_positions=7, focus_step=50),
            ScienceBlock(target=t1, align=blindalign, pattern=stare,
                         instconfig=filter_L,
                         detconfig=[SVQ100_exp, SVX152_exp]),
@@ -55,6 +56,9 @@ def build_OBs():
 if __name__ == '__main__':
     OBs = build_OBs()
     config = load_configuration('hokuula')
+    print('Config Loaded:')
+    for key in config.keys():
+        print(key, config[key])
     hokuula = RollOffRoof(OBs=OBs, **config)
 #     hokuula.wake_up()
 

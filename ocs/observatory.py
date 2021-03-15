@@ -46,7 +46,7 @@ class RollOffRoof():
                  roof=None, roof_config={},
                  telescope=None, telescope_config={},
                  instrument=None, instrument_config={},
-                 detector=None, detector_config={},
+                 detector=None, detector_config=[{}],
                  datadir='~', lat=0, lon=0, height=0,
                  horizon=0,
                  loglevel_console='INFO', logfile=None, loglevel_file='DEBUG',
@@ -62,7 +62,7 @@ class RollOffRoof():
         self.roof = roof(logger=self.logger, **roof_config)
         self.telescope = telescope(logger=self.logger, **telescope_config)
         self.instrument = instrument(logger=self.logger, **instrument_config)
-        self.detector = detector(logger=self.logger, **detector_config)
+        self.detector = [d(logger=self.logger, **detector_config[i]) for i,d in enumerate(detector)]
         self.scheduler = Scheduler(OBs=OBs)
         
         # Load States File

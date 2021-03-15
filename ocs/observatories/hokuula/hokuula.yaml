@@ -1,23 +1,24 @@
-weather:
+weather_config:
   name: simulator
-roof:
+roof_config:
   name: simulator
-telescope:
+telescope_config:
   name: ParamountME
   IP: 192.168.4.56
   port: 11111
-instrument:
+instrument_config:
   name: Hokuula
   IP: 192.168.4.56
   port: 11111
-detectors:
- - name: ZWO_ASI183
+detector_config:
+ - name: ZWO
    IP: 192.168.4.56
    port: 11111
-   cooler_temp: -10
- - name: Canon6D
+   device_number: 0
+ - name: Canon
    IP: 192.168.4.56
-   port: 5555
+   port: 11111
+   device_number: 1
 
 location_file: location.yaml
 states_file: states.yaml

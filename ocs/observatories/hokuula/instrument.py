@@ -5,9 +5,9 @@ from astropy import units as u
 ##-------------------------------------------------------------------------
 ## ODL InstrumentConfig
 ##-------------------------------------------------------------------------
-from odl.instrument_config import InstrumentConfig
+from odl.instrument_config import InstrumentConfig as GenericInstrumentConfig
 
-class HokuulaConfig(InstrumentConfig):
+class InstrumentConfig(GenericInstrumentConfig):
     '''InstrumentConfig object for a setup comprised of:
     - ZWO Filter Wheel
     - Optec Focuser with 2 focusers attached
