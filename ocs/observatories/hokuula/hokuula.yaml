@@ -1,9 +1,17 @@
 weather: simulator
 roof: simulator
-telescope: ParamountME
-OTAs:
- - SVQ100
- - SVX152
+telescope:
+  name: ParamountME
+  IP: 192.168.4.56
+  port: 11111
+detectors:
+ - name: ZWO_ASI183
+   IP: 192.168.4.56
+   port: 11111
+   cooler_temp: -10
+ - name: Canon6D
+   IP: 192.168.4.56
+   port: 5555
 
 location_file: location.yaml
 states_file: states.yaml

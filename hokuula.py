@@ -14,9 +14,9 @@ def build_OBs():
     from odl.offset import Stare
     from odl.alignment import BlindAlign, MaskAlign
 
-    from ocs.observatories.hokuula import InstrumentConfig
-    from ocs.observatories.hokuula.SVQ100 import SVQ100DetectorConfig
-    from ocs.observatories.hokuula.SVX152 import SVX152DetectorConfig
+    from ocs.observatories.hokuula import HokuulaConfig
+    from ocs.observatories.hokuula import ZWODetectorConfig
+    from ocs.observatories.hokuula import CanonDetectorConfig
 
     t1 = Target('M31')
     t2 = Target('M78')

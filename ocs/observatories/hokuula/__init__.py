@@ -1,2 +1,3 @@
 from pypaca import Telescope
-from .instrument import HokuulaInstrumentConfig as InstrumentConfig
+from .instrument import HokuulaConfig
+from pypaca import Camera as DetectorController
