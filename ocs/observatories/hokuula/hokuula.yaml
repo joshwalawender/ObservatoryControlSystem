@@ -1,7 +1,13 @@
-weather: simulator
-roof: simulator
+weather:
+  name: simulator
+roof:
+  name: simulator
 telescope:
   name: ParamountME
+  IP: 192.168.4.56
+  port: 11111
+instrument:
+  name: Hokuula
   IP: 192.168.4.56
   port: 11111
 detectors:

@@ -1,6 +1,0 @@
-roof_time_to_open: 5
-roof_time_to_close: 1
-open_fail_after: null
-open_random_fail_rate: 0
-close_fail_after: null
-close_random_fail_rate: 0

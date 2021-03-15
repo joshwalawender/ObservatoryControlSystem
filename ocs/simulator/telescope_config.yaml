@@ -1,6 +1,0 @@
-time_to_slew: 1
-time_to_park: 1
-slew_fail_after: null
-slew_random_fail_rate: 0
-park_fail_after: null
-park_random_fail_rate: 0

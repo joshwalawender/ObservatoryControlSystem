@@ -1,4 +1,37 @@
-OTA: testota
+weather:
+  name: simulator
+roof:
+  name: simulator
+  roof_time_to_open: 5
+  roof_time_to_close: 1
+  open_fail_after: null
+  open_random_fail_rate: 0
+  close_fail_after: null
+  close_random_fail_rate: 0
+instrument:
+  name: simulator
+  configure_fail_after: null
+  configure_random_fail_rate: 0
+telescope:
+  name: simulator
+  time_to_slew: 1
+  time_to_park: 1
+  slew_fail_after: null
+  slew_random_fail_rate: 0
+  park_fail_after: null
+  park_random_fail_rate: 0
+detectors:
+ - name: simulator
+   exposure_overhead: 1
+   expose_fail_after: null
+   expose_random_fail_rate: 0
+   simulate_exposure_time: True
+ - name: simulator
+   exposure_overhead: 1
+   expose_fail_after: null
+   expose_random_fail_rate: 0
+   simulate_exposure_time: True
+
 location_file: location.yaml
 states_file: states.yaml
 transitions_file: transitions.yaml
@@ -13,14 +46,6 @@ waittime: 2
 maxwait: 10
 datadir: ../data/
 
-weather: simulator
-roof: simulator
-telescope: simulator
-instrument: simulator
-detector: simulator
-
 loglevel_console: info
 loglevel_file: debug
 logfile: null
-
-horizon: 10
