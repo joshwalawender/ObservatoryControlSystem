@@ -56,7 +56,8 @@ class InstrumentController():
     def __init__(self, logger=None, IP='localhost', port=11111):
         self.logger = logger
         self.filterwheel = FilterWheel(logger=logger, IP=IP, port=port)
-        self.focuser = Focuser(logger=logger, IP=IP, port=port)
+        self.focuser1 = Focuser(logger=logger, IP=IP, port=port, device_number=0)
+        self.focuser2 = Focuser(logger=logger, IP=IP, port=port, device_number=1)
 
 
     def configure(self, ic):
@@ -65,9 +66,9 @@ class InstrumentController():
         if ic.filter is not None:
             self.filterwheel.set_position(ic.filter)
         if ic.focuspos1 is not None:
-            self.focuser.move(ic.focuspos1)
+            self.focuser1.move(ic.focuspos1)
         if ic.focuspos2 is not None:
-            self.focuser.move(ic.focuspos2)
+            self.focuser2.move(ic.focuspos2)
 
 
     def collect_header_metadata(self):
@@ -80,15 +81,26 @@ class InstrumentController():
                        'Filter Wheel Name')
         h['FWDRVRSN'] = (self.filterwheel.properties['driverversion'],
                          'Filter Wheel Driver Version')
-        # Focus
-        h['FOCNAME'] = (self.focuser.properties['name'],
+        # Focuser 1
+        h['FOC1NAME'] = (self.focuser1.properties['name'],
                         'Focuser Name')
-        h['FOCDVRSN'] = (self.focuser.properties['driverversion'],
+        h['FOC1DVRV'] = (self.focuser1.properties['driverversion'],
                          'Focuser Driver Version')
-        h['FOCUSPOS'] = (self.focuser.position(),
+        h['FOC1POS'] = (self.focuser1.position(),
                          'Focuser Position')
-        h['FOCTCOMP'] = (self.focuser.tempcomp(),
+        h['FOC1TCMP'] = (self.focuser1.tempcomp(),
                          'Focuser Temperature Compensation')
-        h['FOCTEMP'] = (self.focuser.temperature(),
+        h['FOC1TEMP'] = (self.focuser1.temperature(),
+                        'Focuser Temperature')
+        # Focuser 2
+        h['FOC2NAME'] = (self.focuser2.properties['name'],
+                        'Focuser Name')
+        h['FOC2DVRV'] = (self.focuser2.properties['driverversion'],
+                         'Focuser Driver Version')
+        h['FOC2POS'] = (self.focuser2.position(),
+                         'Focuser Position')
+        h['FOC2TCMP'] = (self.focuser2.tempcomp(),
+                         'Focuser Temperature Compensation')
+        h['FOC2TEMP'] = (self.focuser2.temperature(),
                         'Focuser Temperature')
         return h
