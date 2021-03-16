@@ -18,12 +18,11 @@ def load_configuration(obsname):
     with open(config_file) as FO:
         config = yaml.safe_load(FO)
     config['name'] = obsname
+
     # Instantiate devices
     devices_path = root_path
     module_base_str = f"ocs.observatories.{config['name']}"
     for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
-        print(f'Loading {component}')
-        print(config[f'{component}_config'])
         if component == 'detector':
             module = importlib.import_module(module_base_str)
         else:
@@ -45,56 +44,13 @@ def load_configuration(obsname):
             config[component] = getattr(module, instancename)
             config[f'{component}_config'].pop('name')
 
-    # Read horizon
-    if type(config['horizon']) in [float, int]:
-        config['horizon'] = Table([{'az': 0, 'h': config['horizon']}])
-    else:
-        hpath = root_path / config['horizon']
-        config['horizon'] = Table.read(hpath, format='ascii.csv')
-        config['horizon'].sort('az')
-    return config
-
-
-
-
-
-
-def old_load_configuration(obsname):
-    root_path = Path(__file__).parent/'observatories'/obsname
-    config_file = root_path / f'{obsname}.yaml'
-    if config_file.exists() is False:
-        print(f'Config file not found: {config_file}')
-        sys.exit(0)
-    with open(config_file) as FO:
-        config = yaml.safe_load(FO)
-    config['name'] = obsname
-
-    # Instantiate devices
-    devices_path = root_path
-    module_base_str = f"ocs.observatories.{config['name']}"
-    for component in ['weather', 'roof', 'telescope', 'instrument', 'detector']:
-        print(f'Loading {component}: {config[component]}')
-        if config[component] == 'simulator':
-            module = importlib.import_module(f"ocs.simulator.{component}")
-            device_config_file = Path(__file__).parent/"simulator"/f'{component}_config.yaml'
-        else:
-            if component in ['instrument', 'detector']:
-                # Import based on the OTA
-                module = importlib.import_module(f'{module_base_str}.{config["OTA"]}')
-                device_config_file = root_path/config["OTA"]/f'{component}_config.yaml'
-            else:
-                module = importlib.import_module(module_base_str)
-                device_config_file = root_path/f'{component}_config.yaml'
-        # Open the config file
-        with open(device_config_file) as FO:
-            config[f'{component}_config'] = yaml.safe_load(FO)
-        if config[f'{component}_config'] is None:
-            config[f'{component}_config'] = {}
-        # Create an instance of the device controller
-        instancename = component.capitalize()
-        if component in ['instrument', 'detector']:
-            instancename += 'Controller'
-        config[component] = getattr(module, instancename)
+    # Set defaults
+    if 'states_file' not in config.keys():
+        config['states_file'] = str(Path(__file__).parent.absolute()/'config'/'states.yaml')
+    if 'transitions_file' not in config.keys():
+        config['transitions_file'] = str(Path(__file__).parent.absolute()/'config'/'transitions.yaml')
+    if 'initial_state' not in config.keys():
+        config['initial_state'] = 'sleeping'
 
     # Read horizon
     if type(config['horizon']) in [float, int]:
@@ -103,6 +59,7 @@ def old_load_configuration(obsname):
         hpath = root_path / config['horizon']
         config['horizon'] = Table.read(hpath, format='ascii.csv')
         config['horizon'].sort('az')
+
     return config
 
 

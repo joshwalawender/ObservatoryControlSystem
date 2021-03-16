@@ -66,12 +66,10 @@ class RollOffRoof():
         self.scheduler = Scheduler(OBs=OBs)
         
         # Load States File
-        states_file = Path(__file__).parent / 'config' / states_file
-        with open(states_file.expanduser().absolute()) as FO:
+        with open(Path(states_file).expanduser()) as FO:
             self.states = yaml.safe_load(FO)
         # Load Transitions File
-        transitions_file = Path(__file__).parent / 'config' / transitions_file
-        with open(transitions_file.expanduser().absolute()) as FO:
+        with open(Path(transitions_file).expanduser()) as FO:
             self.transitions = yaml.safe_load(FO)
         # Load Location
         self.location = c.EarthLocation(lat=lat, lon=lon, height=height)
@@ -503,32 +501,11 @@ class RollOffRoof():
         self.focusing_complete()
 
 
-    def build_fits_filename(self, camera='cam'):
-        date_time_string = datetime.utcnow().strftime(f'%Y%m%d_at_%H%M%S')
-        fits_filename = f"{camera}_{date_time_string}UT.fits"
-        fits_file = self.datadir.joinpath(fits_filename)
-        return fits_file
-
-
     def begin_observation(self):
-        '''For now we assume only one detconfig
         '''
-        # Gather header info about OB
+        '''
+        self.log(f'Starting observations: {self.current_OB.pattern}')
         obhdr = self.current_OB.to_header()
-        dc = self.current_OB.detconfig[0]
-        obhdr += dc.to_header()
-        self.log(f'Starting observation: {self.current_OB.pattern}: {dc}')
-        # Set detector parameters
-        self.detector.set_exptime(dc.exptime)
-        if dc.gain is not None:
-            self.detector.set_gain(dc.gain)
-        if dc.binning is not None:
-            binx, biny = dc.binning.split('x')
-            self.detector.set_binning(int(binx), int(biny))
-        if dc.window is not None:
-            self.detector.set_window(dc.window)
-        # Start Observing
-        dataok = []
         for i,position in enumerate(self.current_OB.pattern):
             self.log(f'  Starting observation at position {i+1} of {len(self.current_OB.pattern)}')
             # Offset to position
@@ -540,28 +517,55 @@ class RollOffRoof():
                 self.log(f'  No guiding at this position')
                 # Turn off guiding
 
-            # Take Data
-            for j in range(dc.nexp):
-                obhdr.set('EXPNO', value=j+1, comment='Exposure number at this position')
-                self.log(f'    Starting {dc.exptime:.0f}s exposure ({j+1} of {dc.nexp})')
-                hdr = self.telescope.collect_header_metadata()
-                hdr += self.instrument.collect_header_metadata()
-                hdr += obhdr
-                try:
-                    hdul = self.detector.expose(additional_header=hdr)
-                except DetectorFailure as err:
-                    self.log('Detector failure', level=logging.ERROR)
-                    self.log(f'{err}', level=logging.ERROR)
-                    hdul = None
-                    self.error_count += 1
-                else:
-                    dataok.append(True)
-                if hdul is not None:
-                    fits_file = self.build_fits_filename(camera=f'cam{self.detector.device_number}')
-                    self.log(f'    Writing {fits_file.name}')
-                    hdul.writeto(fits_file, overwrite=False)
+            # Start exposures on all cameras
+            for j,dc in enumerate(self.current_OB.detconfig):
+                filesok = start_obseravtion_thread(obhdr, dc,
+                                self.telescope, self.instrument, self.detector[j],
+                                datadir=self.datadir, log=self.logger)
+
         # return to offset 0, 0
-        allok = np.all(dataok)
-        self.record_OB(failed=not allok)
+        self.record_OB(failed=False)
         self.observation_complete()
 
+
+def build_fits_filename(camera='cam', datadir=Path('.')):
+    date_time_string = datetime.utcnow().strftime(f'%Y%m%d_at_%H%M%S')
+    fits_filename = f"{camera}_{date_time_string}UT.fits"
+    fits_file = datadir.joinpath(fits_filename)
+    return fits_file
+
+
+def start_obseravtion_thread(obhdr, dc, telescope, instrument, detector,
+                             datadir=Path('.'), log=None):
+    # Set detector parameters
+    detector.set_exptime(dc.exptime)
+#     if dc.gain is not None:
+#         detector.set_gain(dc.gain)
+#     if dc.binning is not None:
+#         binx, biny = dc.binning.split('x')
+#         detector.set_binning(int(binx), int(biny))
+#     if dc.window is not None:
+#         detector.set_window(dc.window)
+
+    # Take Data
+    filesok = []
+    obhdr += dc.to_header()
+    for j in range(dc.nexp):
+        obhdr.set('EXPNO', value=j+1, comment='Exposure number at this position')
+        log.info(f'    Starting {dc.exptime:.0f}s exposure ({j+1} of {dc.nexp})')
+        hdr = telescope.collect_header_metadata()
+        hdr += instrument.collect_header_metadata()
+        hdr += obhdr
+        try:
+            hdul = detector.expose(additional_header=hdr)
+        except DetectorFailure as err:
+            log.error('Detector failure')
+            log.error(f'{err}')
+            hdul = None
+        else:
+            ff = build_fits_filename(camera=f'cam{detector.device_number}',
+                                     datadir=datadir)
+            log.info(f'    Writing {ff.name}')
+            hdul.writeto(ff, overwrite=False)
+            filesok.append(ff.exists())
+    return filesok

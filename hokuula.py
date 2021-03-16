@@ -42,12 +42,12 @@ def build_OBs():
            ScienceBlock(target=t1, align=blindalign, pattern=stare,
                         instconfig=filter_R,
                         detconfig=[SVQ100_exp, SVX152_exp]),
-           ScienceBlock(target=t1, align=blindalign, pattern=stare,
-                        instconfig=filter_G,
-                        detconfig=[SVQ100_exp, SVX152_exp]),
-           ScienceBlock(target=t1, align=blindalign, pattern=stare,
-                        instconfig=filter_B,
-                        detconfig=[SVQ100_exp, SVX152_exp]),
+#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
+#                         instconfig=filter_G,
+#                         detconfig=[SVQ100_exp, SVX152_exp]),
+#            ScienceBlock(target=t1, align=blindalign, pattern=stare,
+#                         instconfig=filter_B,
+#                         detconfig=[SVQ100_exp, SVX152_exp]),
            ]
     OBs = ObservingBlockList(OBs)
     return OBs
@@ -56,11 +56,8 @@ def build_OBs():
 if __name__ == '__main__':
     OBs = build_OBs()
     config = load_configuration('hokuula')
-    print('Config Loaded:')
-    for key in config.keys():
-        print(key, config[key])
     hokuula = RollOffRoof(OBs=OBs, **config)
-#     hokuula.wake_up()
+    hokuula.wake_up()
 
 
 #     import zmq

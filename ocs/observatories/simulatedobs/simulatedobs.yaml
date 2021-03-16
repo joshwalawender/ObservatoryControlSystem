@@ -32,11 +32,6 @@ detectors:
    expose_random_fail_rate: 0
    simulate_exposure_time: True
 
-location_file: location.yaml
-states_file: states.yaml
-transitions_file: transitions.yaml
-initial_state: sleeping
-
 lat: 20.028790056
 lon: -155.714876639
 height: 677

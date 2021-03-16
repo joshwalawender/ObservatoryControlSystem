@@ -64,8 +64,10 @@ class InstrumentController():
         '''
         if ic.filter is not None:
             self.filterwheel.set_position(ic.filter)
-        if ic.focuspos is not None:
-            self.focuser.move(ic.focuspos)
+        if ic.focuspos1 is not None:
+            self.focuser.move(ic.focuspos1)
+        if ic.focuspos2 is not None:
+            self.focuser.move(ic.focuspos2)
 
 
     def collect_header_metadata(self):
