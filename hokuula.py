@@ -26,9 +26,9 @@ def build_OBs():
     filter_R = InstrumentConfig(filter='R')
     filter_G = InstrumentConfig(filter='G')
     filter_B = InstrumentConfig(filter='B')
-    SVQ100_exp = ZWODetectorConfig(exptime=2, nexp=2)
+    SVQ100_exp = ZWODetectorConfig(exptime=10, nexp=2)
+    SVX152_exp = CanonDetectorConfig(exptime=7, nexp=3)
     SVQ100_focus_exp = ZWODetectorConfig(exptime=1, nexp=1)
-    SVX152_exp = CanonDetectorConfig(exptime=2, nexp=2)
     SVX152_focus_exp = CanonDetectorConfig(exptime=1, nexp=1)
 
     OBs = [

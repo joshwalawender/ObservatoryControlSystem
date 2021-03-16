@@ -35,6 +35,7 @@ detectors:
 lat: 20.028790056
 lon: -155.714876639
 height: 677
+horizon: 25
 
 max_allowed_errors: 1
 waittime: 2

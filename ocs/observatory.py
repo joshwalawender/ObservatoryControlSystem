@@ -6,6 +6,8 @@ import random
 import numpy as np
 import yaml
 import logging
+from copy import deepcopy
+import threading
 
 from astropy import units as u
 from astropy.io import fits
@@ -85,7 +87,7 @@ class RollOffRoof():
                                         show_conditions=True,
                                         )
             # Generate state diagram
-            self.machine.get_graph().draw('state_diagram.png', prog='dot')
+#             self.machine.get_graph().draw('state_diagram.png', prog='dot')
         except:
             self.machine = Machine(model=self,
                                    states=self.states,
@@ -123,14 +125,14 @@ class RollOffRoof():
         assert np.isclose(height, self.telescope.siteelevation())
         self.log(f'Sending date and time to mount')
         now = datetime.utcnow()
-        self.log(f'Computer time: {now.isoformat()}', level=logging.DEBUG)
+        self.log(f'Computer time: {now.isoformat()}')
         self.telescope.set_utcdate(f"{now.isoformat()}Z")
         mountnow_str = self.telescope.utcdate()
-        self.log(f'Mount time: {mountnow_str}', level=logging.DEBUG)
+        self.log(f'Mount time: {mountnow_str}')
         while len(mountnow_str) < 23: mountnow_str += '0'
         mountnow = datetime.fromisoformat(mountnow_str)
         dt = mountnow - now
-        assert dt.total_seconds() < 0.1
+        assert dt.total_seconds() < 0.25
 
 
     ##-------------------------------------------------------------------------
@@ -518,10 +520,19 @@ class RollOffRoof():
                 # Turn off guiding
 
             # Start exposures on all cameras
+            threads = []
+            headers = [deepcopy(obhdr) for dc in self.current_OB.detconfig]
             for j,dc in enumerate(self.current_OB.detconfig):
-                filesok = start_obseravtion_thread(obhdr, dc,
-                                self.telescope, self.instrument, self.detector[j],
-                                datadir=self.datadir, log=self.logger)
+                self.log(f'Starting exposure thread {j}')
+                threadargs = (headers[j], dc, self.telescope, self.instrument,
+                              self.detector[j], self.datadir, self.logger)
+                x = threading.Thread(target=start_obseravtion_thread,
+                              args=threadargs)
+                threads.append(x)
+                x.start()
+            for index, thread in enumerate(threads):
+                thread.join()
+                self.log(f"Exposure thread {index} done")
 
         # return to offset 0, 0
         self.record_OB(failed=False)
@@ -535,37 +546,31 @@ def build_fits_filename(camera='cam', datadir=Path('.')):
     return fits_file
 
 
-def start_obseravtion_thread(obhdr, dc, telescope, instrument, detector,
-                             datadir=Path('.'), log=None):
+def start_obseravtion_thread(obhdr, dc, telescope, instrument, detector, 
+                             datadir, log):
     # Set detector parameters
-    detector.set_exptime(dc.exptime)
-#     if dc.gain is not None:
-#         detector.set_gain(dc.gain)
-#     if dc.binning is not None:
-#         binx, biny = dc.binning.split('x')
-#         detector.set_binning(int(binx), int(biny))
-#     if dc.window is not None:
-#         detector.set_window(dc.window)
+    log.info(f'{dc.instrument} : Setting detector parameters')
+    detector.setup_detector(dc)
 
     # Take Data
     filesok = []
     obhdr += dc.to_header()
     for j in range(dc.nexp):
         obhdr.set('EXPNO', value=j+1, comment='Exposure number at this position')
-        log.info(f'    Starting {dc.exptime:.0f}s exposure ({j+1} of {dc.nexp})')
+        log.info(f'{dc.instrument} : Starting {dc.exptime:.0f}s exposure ({j+1} of {dc.nexp})')
         hdr = telescope.collect_header_metadata()
         hdr += instrument.collect_header_metadata()
         hdr += obhdr
         try:
             hdul = detector.expose(additional_header=hdr)
         except DetectorFailure as err:
-            log.error('Detector failure')
-            log.error(f'{err}')
+            log.error('{dc.instrument} : Detector failure')
+            log.error(f'{dc.instrument} : {err}')
             hdul = None
         else:
-            ff = build_fits_filename(camera=f'cam{detector.device_number}',
+            ff = build_fits_filename(camera=dc.instrument,
                                      datadir=datadir)
-            log.info(f'    Writing {ff.name}')
+            log.info(f'{dc.instrument} : Writing {ff.name}')
             hdul.writeto(ff, overwrite=False)
             filesok.append(ff.exists())
     return filesok

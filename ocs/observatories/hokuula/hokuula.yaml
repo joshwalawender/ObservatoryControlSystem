@@ -23,6 +23,7 @@ detector_config:
 lat: 20.028790056
 lon: -155.714876639
 height: 677
+horizon: horizon.csv
 
 max_allowed_errors: 1
 waittime: 2
@@ -32,5 +33,3 @@ datadir: ../data/
 loglevel_console: info
 loglevel_file: debug
 logfile: ../data/hokuula.log
-
-horizon: horizon.csv

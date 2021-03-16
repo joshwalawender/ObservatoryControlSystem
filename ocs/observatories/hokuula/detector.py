@@ -12,7 +12,7 @@ class ZWODetectorConfig(DetectorConfig):
 
 
 class CanonDetectorConfig(DetectorConfig):
-    def __init__(self, instrument='Canon 6D', detector='',
+    def __init__(self, instrument='Canon_6D', detector='',
                  exptime=0, nexp=1, readoutmode='fast'):
         super().__init__(instrument=instrument, detector=detector,
                          exptime=exptime, nexp=nexp, readoutmode=readoutmode,
