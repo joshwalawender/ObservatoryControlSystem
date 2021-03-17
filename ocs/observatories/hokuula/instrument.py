@@ -12,7 +12,7 @@ class InstrumentConfig(GenericInstrumentConfig):
     - ZWO Filter Wheel
     - Optec Focuser with 2 focusers attached
     '''
-    def __init__(self, filter='L', focuspos1=None, focuspos2=None):
+    def __init__(self, filter='L', focusposSVQ=None, focusposSVX=None):
         super().__init__(instrument='SVQ100_SVX152')
         self.name = f'ZWO {filter} Filter'
         filter_wavelengths = {'L': 550*u.nm, # 396-705
@@ -26,30 +26,29 @@ class InstrumentConfig(GenericInstrumentConfig):
         if filter in filter_wavelengths.keys():
             self.obswl = filter_wavelengths[filter]
         self.filter = filter
-        self.focuspos1 = focuspos1
-        self.focuspos2 = focuspos2
-        if focuspos1 is not None:
-            self.name += ' (focuspos1={focuspos1:.0f})'
-        if focuspos2 is not None:
-            self.name += ' (focuspos2={focuspos2:.0f})'
+        self.focusposSVQ = focusposSVQ
+        self.focusposSVX = focusposSVX
+        if focusposSVQ is not None:
+            self.name += ' (focuspos1={focusposSVQ:.0f})'
+        if focusposSVX is not None:
+            self.name += ' (focuspos2={focusposSVX:.0f})'
 
 
     def to_dict(self):
         output = super().to_dict()
         output['filter'] = self.filter
-        output['focuspos1'] = self.focuspos1
-        output['focuspos2'] = self.focuspos2
+        output['focusposSVQ'] = self.focusposSVQ
+        output['focusposSVX'] = self.focusposSVX
         return output
 
 
     def to_header(self):
         h = fits.Header()
         h['ICNAME'] = (self.name, 'Instrument Config Name')
-        h['ICPKG'] = (self.package, 'Instrument Config Package Name')
         h['ICINST'] = (self.instrument, 'Instrument Config Instrument Name')
         h['ICFILT'] = (self.filter, 'Instrument Config Filter')
-        h['ICFOC1'] = (self.focuspos1, 'Instrument Config Focus Position 1')
-        h['ICFOC2'] = (self.focuspos2, 'Instrument Config Focus Position 2')
+        h['ICFOCSVQ'] = (self.focusposSVQ, 'Instrument Config Focus Position SVQ')
+        h['ICFOCSVX'] = (self.focusposSVX, 'Instrument Config Focus Position SVX')
         return h
 
 
@@ -69,8 +68,8 @@ class InstrumentController():
     def __init__(self, logger=None, IP='localhost', port=11111):
         self.logger = logger
         self.filterwheel = FilterWheel(logger=logger, IP=IP, port=port)
-        self.focuser1 = Focuser(logger=logger, IP=IP, port=port, device_number=0)
-        self.focuser2 = Focuser(logger=logger, IP=IP, port=port, device_number=1)
+        self.focuserSVQ = Focuser(logger=logger, IP=IP, port=port, device_number=0)
+        self.focuserSVX = Focuser(logger=logger, IP=IP, port=port, device_number=1)
 
 
     def configure(self, ic):
@@ -78,10 +77,10 @@ class InstrumentController():
         '''
         if ic.filter is not None:
             self.filterwheel.set_position(ic.filter)
-        if ic.focuspos1 is not None:
-            self.focuser1.move(ic.focuspos1)
-        if ic.focuspos2 is not None:
-            self.focuser2.move(ic.focuspos2)
+        if ic.focusposSVQ is not None:
+            self.focuserSVQ.move(ic.focusposSVQ)
+        if ic.focusposSVX is not None:
+            self.focuserSVX.move(ic.focusposSVX)
 
 
     def collect_header_metadata(self):
@@ -95,25 +94,25 @@ class InstrumentController():
         h['FWDRVRSN'] = (self.filterwheel.properties['driverversion'],
                          'Filter Wheel Driver Version')
         # Focuser 1
-        h['FOC1NAME'] = (self.focuser1.properties['name'],
+        h['FOC1NAME'] = (self.focuserSVQ.properties['name'],
                         'Focuser Name')
-        h['FOC1DVRV'] = (self.focuser1.properties['driverversion'],
+        h['FOC1DVRV'] = (self.focuserSVQ.properties['driverversion'],
                          'Focuser Driver Version')
-        h['FOC1POS'] = (self.focuser1.position(),
+        h['FOC1POS'] = (self.focuserSVQ.position(),
                          'Focuser Position')
-        h['FOC1TCMP'] = (self.focuser1.tempcomp(),
+        h['FOC1TCMP'] = (self.focuserSVQ.tempcomp(),
                          'Focuser Temperature Compensation')
-        h['FOC1TEMP'] = (self.focuser1.temperature(),
+        h['FOC1TEMP'] = (self.focuserSVQ.temperature(),
                         'Focuser Temperature')
         # Focuser 2
-        h['FOC2NAME'] = (self.focuser2.properties['name'],
+        h['FOC2NAME'] = (self.focuserSVX.properties['name'],
                         'Focuser Name')
-        h['FOC2DVRV'] = (self.focuser2.properties['driverversion'],
+        h['FOC2DVRV'] = (self.focuserSVX.properties['driverversion'],
                          'Focuser Driver Version')
-        h['FOC2POS'] = (self.focuser2.position(),
+        h['FOC2POS'] = (self.focuserSVX.position(),
                          'Focuser Position')
-        h['FOC2TCMP'] = (self.focuser2.tempcomp(),
+        h['FOC2TCMP'] = (self.focuserSVX.tempcomp(),
                          'Focuser Temperature Compensation')
-        h['FOC2TEMP'] = (self.focuser2.temperature(),
+        h['FOC2TEMP'] = (self.focuserSVX.temperature(),
                         'Focuser Temperature')
         return h
