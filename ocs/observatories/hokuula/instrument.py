@@ -13,7 +13,8 @@ class InstrumentConfig(GenericInstrumentConfig):
     - Optec Focuser with 2 focusers attached
     '''
     def __init__(self, filter='L', focuspos1=None, focuspos2=None):
-        super().__init__(name=f'{filter} Filter')
+        super().__init__(instrument='SVQ100_SVX152')
+        self.name = f'ZWO {filter} Filter'
         filter_wavelengths = {'L': 550*u.nm, # 396-705
                               'R': 530*u.nm, # 592-690
                               'G': 530*u.nm, # 492-572
@@ -27,6 +28,18 @@ class InstrumentConfig(GenericInstrumentConfig):
         self.filter = filter
         self.focuspos1 = focuspos1
         self.focuspos2 = focuspos2
+        if focuspos1 is not None:
+            self.name += ' (focuspos1={focuspos1:.0f})'
+        if focuspos2 is not None:
+            self.name += ' (focuspos2={focuspos2:.0f})'
+
+
+    def to_dict(self):
+        output = super().to_dict()
+        output['filter'] = self.filter
+        output['focuspos1'] = self.focuspos1
+        output['focuspos2'] = self.focuspos2
+        return output
 
 
     def to_header(self):
