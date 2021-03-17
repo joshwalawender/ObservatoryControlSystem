@@ -33,3 +33,6 @@ datadir: ../data/
 loglevel_console: info
 loglevel_file: debug
 logfile: ../data/hokuula.log
+
+mongoIP: 192.168.4.49
+mongoport: 32768

@@ -58,24 +58,3 @@ if __name__ == '__main__':
     config = load_configuration('hokuula')
     hokuula = RollOffRoof(OBs=OBs, **config)
     hokuula.wake_up()
-
-
-#     import zmq
-#     from time import sleep
-#     import struct
-#     
-#     def send_recv(socket, msg):
-#         print(f'Sending {msg}')
-#         socket.send(bytes(msg, 'utf-8'))
-#         msg = socket.recv()
-#         return msg
-#     
-#     context = zmq.Context()
-#     socket = context.socket(zmq.PAIR)
-#     socket.connect("tcp://192.168.4.56:5555")
-#     
-#     result = send_recv(socket, 'set_exptime 3')
-#     print(result.decode())
-#     im = send_recv(socket, 'expose')
-    
-

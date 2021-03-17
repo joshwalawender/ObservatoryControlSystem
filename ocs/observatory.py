@@ -1,13 +1,15 @@
 #!python3
+import os
 from pathlib import Path
 from time import sleep
 from datetime import datetime
 import random
 import numpy as np
 import yaml
-import logging
+from logging import DEBUG, INFO, WARNING, ERROR
 from copy import deepcopy
 import threading
+import pymongo
 
 from astropy import units as u
 from astropy.io import fits
@@ -51,6 +53,7 @@ class RollOffRoof():
                  detector=None, detector_config=[{}],
                  datadir='~', lat=0, lon=0, height=0,
                  horizon=0,
+                 mongoIP='192.168.4.49', mongoport=32768,
                  loglevel_console='INFO', logfile=None, loglevel_file='DEBUG',
                  OBs=[],
                  ):
@@ -59,6 +62,7 @@ class RollOffRoof():
         self.logger = create_log(loglevel_console=loglevel_console,
                                  logfile=logfile,
                                  loglevel_file=loglevel_file)
+        self.uname_result = os.uname()
         # Components
         self.weather = weather(logger=self.logger, **weather_config)
         self.roof = roof(logger=self.logger, **roof_config)
@@ -134,10 +138,24 @@ class RollOffRoof():
         dt = mountnow - now
         assert dt.total_seconds() < 0.25
 
+        # Mongo Connection
+        self.mongoIP = mongoIP
+        self.mongoport = mongoport
+        try:
+            self.client = pymongo.MongoClient(mongoIP, mongoport)
+            self.db = self.client[name]
+            self.status_collection = self.db['status']
+            self.log(f'Connected to Mongo DB')
+        except:
+            self.client = None
+            self.db = None
+            self.status_collection = None
+            self.log(f'Failed to connect to Mongo DB', level=WARNING)
+
 
     ##-------------------------------------------------------------------------
     ## Record Keeping Utilities
-    def log(self, msg, level=logging.INFO):
+    def log(self, msg, level=INFO):
         current_OB = f'{self.current_OB.blocktype} @ {self.current_OB.target}'\
                      if self.current_OB is not None else 'None'
         self.logger.log(level, f'{self.state:15s}|{current_OB:30s}: {msg}')
@@ -146,17 +164,18 @@ class RollOffRoof():
     def entry_timestamp(self):
         if str(self.state) != str(self.last_state):
             self.log(f'Entering state: {self.state} (from {self.last_state})')
-            self.log('Resetting entry time', level=logging.DEBUG)
+            self.log('Resetting entry time', level=DEBUG)
             self.entered_state_at = datetime.now()
         if str(self.state) == 'acquiring':
             self.wait_duration = 0
+        self.update_db()
 
 
     def exit_timestamp(self):
         self.last_state = str(self.state)
         duration = (datetime.now() - self.entered_state_at).total_seconds()
         self.log(f'Exiting state {self.state} after {duration:.1f}s',
-                 level=logging.DEBUG)
+                 level=DEBUG)
         if self.state in self.durations.keys():
             self.durations[self.state] += duration
         else:
@@ -166,13 +185,13 @@ class RollOffRoof():
     def log_wakeup(self):
         self.log(f'Waking up observatory: {self.name}')
         # log states
-        self.log('States', logging.DEBUG)
+        self.log('States', DEBUG)
         for state in self.states:
-            self.log(f'  {state}', logging.DEBUG)
+            self.log(f'  {state}', DEBUG)
         # log transitions
-        self.log('Transitions', logging.DEBUG)
+        self.log('Transitions', DEBUG)
         for transition in self.transitions:
-            self.log(f'  {transition}', logging.DEBUG)
+            self.log(f'  {transition}', DEBUG)
         # log location
         self.log(f'  Location:')
         self.log(f'    latitude = {self.location.lat:.6f}')
@@ -189,7 +208,7 @@ class RollOffRoof():
                'failed': failed}
         self.executed.add_row(row)
         sorf_string = {False: 'Succeeded', True: 'Failed'}[failed]
-        sorf_level = {False: logging.INFO, True: logging.WARNING}[failed]
+        sorf_level = {False: INFO, True: WARNING}[failed]
         self.log(f'OB {sorf_string}', level=sorf_level)
         self.current_OB = None
 
@@ -201,7 +220,7 @@ class RollOffRoof():
     def night_summary(self):
         if self.error_count > 0:
             self.log(f'Encountered {self.error_count} errors',
-                     level=logging.WARNING)
+                     level=WARNING)
 
         total_duration = (datetime.now() - self.startup_at).total_seconds()
         duration_table = Table(names=('State', 'Duration', 'Percent'),
@@ -219,17 +238,55 @@ class RollOffRoof():
         self.log(f'\n\n====== Observed ======\n{self.executed}\n')
 
 
+    def to_dict(self):
+        '''Output the state of the observatory as a dict for storage in a
+        database for both record keeping and for live status display on a web
+        page.
+        '''
+        output = {'timestamp': datetime.now(),
+                  'name': self.name,
+                  'sysname': self.uname_result.sysname,
+                  'nodename': self.uname_result.nodename,
+                  'lat': self.location.lat.deg,
+                  'lon': self.location.lon.deg,
+                  'height': self.location.height.to(u.meter).value,
+                  'datadir': str(self.datadir.absolute()),
+                  'weather': str(self.weather),
+                  'roof': str(self.roof),
+                  'telescope': str(self.telescope),
+                  'instrument': str(self.instrument),
+                  'detector': [str(d) for d in self.detector],
+                  'current_OB': str(self.current_OB),
+                  'N_executed_OBs': len(self.executed),
+                  }
+        properties = ['name', 'waittime', 'maxwait', 'wait_duration',
+                      'max_allowed_errors', 'state', 'last_state',
+                      'startup_at', 'entered_state_at', 'we_are_done',
+                      'error_count']
+        for prop in properties:
+            output[prop] = getattr(self, prop, 'unknown')
+
+        return output
+
+
+    def update_db(self):
+        if self.status_collection is None:
+            return
+        statid = self.status_collection.insert_one(self.to_dict()).inserted_id
+        self.log(f'Inserted status entry ID = {statid}', level=DEBUG)
+
+
     ##-------------------------------------------------------------------------
     ## Status Checks
     def is_safe(self):
         safe = self.weather.is_safe()
-        self.log(f'Weather is Safe? {safe}', level=logging.DEBUG)
+        self.log(f'Weather is Safe? {safe}', level=DEBUG)
         return safe
 
 
     def is_unsafe(self):
         safe = self.weather.is_safe()
-        self.log(f'Weather is Safe? {safe}', level=logging.DEBUG)
+        self.log(f'Weather is Safe? {safe}', level=DEBUG)
         return not safe
 
 
@@ -240,25 +297,25 @@ class RollOffRoof():
 #         altaz = c.AltAz(location=self.location, obstime=obstime,
 #                         obswl=0.5*u.micron)
 #         sun_is_down = sun.transform_to(altaz).alt < 0
-#         self.log(f'Sun is Down? {sun_is_down}', level=logging.DEBUG)
+#         self.log(f'Sun is Down? {sun_is_down}', level=DEBUG)
         # Replace this with a simple timer which has sunrise after a set time
         uptime = (datetime.now() - self.startup_at).total_seconds()
         sun_is_down = uptime < self.maxwait*3
-        self.log(f'Is it dark? {sun_is_down}', level=logging.DEBUG)
+        self.log(f'Is it dark? {sun_is_down}', level=DEBUG)
         return sun_is_down
 
 
     def done_observing(self):
         too_many_errors = self.error_count > self.max_allowed_errors
         if too_many_errors is True:
-            self.log(f'Error count for tonight exceeded', level=logging.ERROR)
+            self.log(f'Error count for tonight exceeded', level=ERROR)
             self.begin_end_of_night_shutdown()
         done_string = {True: '', False: 'not '}[self.we_are_done]
 
         if self.state == 'waiting_closed' and not self.is_dark():
             self.begin_end_of_night_shutdown()
 
-        self.log(f'We are {done_string}shutting down', level=logging.DEBUG)
+        self.log(f'We are {done_string}shutting down', level=DEBUG)
         return self.we_are_done
 
 
@@ -354,7 +411,7 @@ class RollOffRoof():
         self.log(f'Horizon is {h:.1f} at {altaz_coord.az:.1f}')
         below = altaz_coord.alt.value <= h
         if below is True:
-            self.log(f'Target is or will set below the horizon', level=logging.ERROR)
+            self.log(f'Target is or will set below the horizon', level=ERROR)
         return below
 
 
@@ -365,8 +422,8 @@ class RollOffRoof():
             self.current_OB = self.scheduler.select()
             self.log(f'Got OB: {self.current_OB}')
         except SchedulingFailure as err:
-            self.log(f'Scheduling error: {err}', level=logging.ERROR)
-            self.log(f'{err}', level=logging.ERROR)
+            self.log(f'Scheduling error: {err}', level=ERROR)
+            self.log(f'{err}', level=ERROR)
             self.software_errors.append(err)
 
 
@@ -399,8 +456,8 @@ class RollOffRoof():
         try:
             self.roof.open()
         except RoofFailure as err: 
-            self.log('Problem opening roof!', level=logging.ERROR)
-            self.log(f'{err}', level=logging.ERROR)
+            self.log('Problem opening roof!', level=ERROR)
+            self.log(f'{err}', level=ERROR)
             self.errors.append(err)
             self.error_count += 1
             self.begin_end_of_night_shutdown()
@@ -412,8 +469,8 @@ class RollOffRoof():
         try:
             self.roof.close()
         except RoofFailure as err:
-            self.log('Roof failure on closing', logging.ERROR)
-            self.log(f'{err}', level=logging.ERROR)
+            self.log('Roof failure on closing', ERROR)
+            self.log(f'{err}', level=ERROR)
             self.errors.append(err)
             self.error_count += 1
         self.done_closing()
@@ -439,8 +496,8 @@ class RollOffRoof():
                 try:
                     self.telescope.slew(self.current_OB.target.coord())
                 except TelescopeFailure as err:
-                    self.log('Telescope slew failed', level=logging.ERROR)
-                    self.log(f'{err}', level=logging.ERROR)
+                    self.log('Telescope slew failed', level=ERROR)
+                    self.log(f'{err}', level=ERROR)
                     self.errors.append(err)
                     self.error_count += 1
                 else:
@@ -450,11 +507,11 @@ class RollOffRoof():
             # Other Align methods go here
             else:
                 msg = f"Did not recognize alignment {self.current_OB.align.name}"
-                self.log(msg, level=logging.ERROR)
+                self.log(msg, level=ERROR)
                 self.errors.append(AcquisitionFailure(msg))
                 self.record_OB(failed=True)
         else:
-            self.log('No OB to acquire', level=logging.DEBUG)
+            self.log('No OB to acquire', level=DEBUG)
         self.done_acquiring()
 
 
@@ -464,8 +521,8 @@ class RollOffRoof():
         try:
             self.telescope.park()
         except TelescopeFailure as err:
-            self.log('Telescope parking failed', level=logging.ERROR)
-            self.log(f'{err}', level=logging.ERROR)
+            self.log('Telescope parking failed', level=ERROR)
+            self.log(f'{err}', level=ERROR)
             self.errors.append(err)
             self.error_count += 1
         else:
@@ -478,8 +535,8 @@ class RollOffRoof():
         try:
             self.instrument.configure(self.current_OB.instconfig)
         except InstrumentFailure as err:
-            self.log('Instrument configuration failed', level=logging.ERROR)
-            self.log(f'{err}', level=logging.ERROR)
+            self.log('Instrument configuration failed', level=ERROR)
+            self.log(f'{err}', level=ERROR)
             self.errors.append(err)
             self.error_count += 1
         self.start_observation()
@@ -497,7 +554,7 @@ class RollOffRoof():
             failed = False
         else:
             self.log(f'Focus strategy {self.current_OB} is unknown',
-                     level=logging.ERROR)
+                     level=ERROR)
             failed = True
         self.record_OB(failed=failed)
         self.focusing_complete()
@@ -510,8 +567,9 @@ class RollOffRoof():
         obhdr = self.current_OB.to_header()
         for i,position in enumerate(self.current_OB.pattern):
             self.log(f'  Starting observation at position {i+1} of {len(self.current_OB.pattern)}')
-            # Offset to position
             obhdr.set('POSITION', value=i+1, comment='Offset pattern position number')
+            # Offset to position
+
             # Set guiding for this position
             if position.guide is True:
                 raise NotImplementedError('Guiding not implemented')
